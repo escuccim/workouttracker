@@ -1,0 +1,136 @@
+{% extends 'workouttracker/base.html' %}
+{% load dict_key %}
+{% load index %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Workout Tracker : {{ user.first_name }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <canvas id="myChart" width="400" height="150"></canvas>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel-group" id="accordion">
+                {% for date in dates %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" href="#{{date}}">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            {{ date }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            {{ minutes|index:forloop.counter0 }} mins
+                                        </div>
+                                        <div class="col-md-2">
+                                            {{ calories|index:forloop.counter0 }} kCal
+                                        </div>
+                                    </div>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="{{date}}" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                {% for workout in workouts|dict_key:date %}
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            {{ workout.start }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            {{ workout.group.name }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            {{ workout.duration }} mins
+                                        </div>
+                                        <div class="col-md-2">
+                                            {{ workout.calories }} kCal
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
+<script>
+
+function get_chart_data(){
+    var data;
+    $.ajax({
+        async: false,
+        url: "api/chart_data",
+        type: 'get',
+        success: function(result){
+            data = result;
+            console.log(result);
+        },
+        error: function(){
+            console.log("Error!");
+        }
+        });
+    return data;
+}
+
+data = get_chart_data();
+
+var ctx = document.getElementById("myChart").getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: data.dates,
+        datasets: [{
+            label: 'Calories',
+            data: data.calories,
+            label: 'kCal',
+            yAxisID: 'A',
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+            ],
+            borderWidth: 1
+        },{
+            label: 'Minutes',
+            data: data.minutes,
+            label: 'min',
+            yAxisID: 'B',
+            backgroundColor: [
+                'rgba(132, 99, 255, 0.2)',
+            ],
+            borderColor: [
+                'rgba(132,99,255,1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+          yAxes: [{
+            id: 'A',
+            type: 'linear',
+            position: 'left',
+          }, {
+            id: 'B',
+            type: 'linear',
+            position: 'right',
+          }]
+        }
+    }
+});
+</script>
+{% endblock %}
