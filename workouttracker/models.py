@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+import datetime
 
 class BodyAreas(models.Model):
     name = models.CharField(max_length=50)
+    order = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -81,8 +83,13 @@ class WorkoutSummary(models.Model):
     user = models.ForeignKey(User)
 
     @staticmethod
-    def workouts_by_day(user):
-        workouts = WorkoutSummary.objects.filter(user=user)
+    def workouts_by_day(user, end_date=None, start_date=None):
+        if start_date is None:
+            start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+        if end_date is None:
+            end_date = datetime.datetime.now()
+
+        workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date)
 
         workout_dict = {}
         for workout in workouts:
@@ -96,8 +103,13 @@ class WorkoutSummary(models.Model):
         return workout_dict
 
     @staticmethod
-    def summary_by_day(user):
-        workouts = WorkoutSummary.objects.filter(user=user)
+    def summary_by_day(user, end_date=None, start_date=None):
+        if start_date is None:
+            start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+        if end_date is None:
+            end_date = datetime.datetime.now()
+
+        workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date)
 
         dates = []
         calories = []

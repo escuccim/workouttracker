@@ -11,7 +11,44 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <canvas id="myChart" width="400" height="150"></canvas>
+            <form class="form form-horizontal" id="controller">
+                <div class="panel panel-default">
+
+                    <div class="row">
+                        <label class="control-label col-md-1" for="start_date">Start:</label>
+                        <div class="col-md-2">
+                            <input class="form-control" id="start_date" name="start_date" type="date" value="{{ start_date }}">
+                        </div>
+
+                        <label class="control-label col-md-1" for="end_date">End:</label>
+                        <div class="col-md-2">
+                            <input class="form-control" id="end_date" name="end_date" type="date" value="{{ end_date }}">
+                        </div>
+
+                        <label class="control-label col-md-1" for="chart">Chart:</label>
+                        <div class="col-md-2">
+                            <select class="form-control" id="chart" name="chart">
+                                <option value="summary">Summary</option>
+                                <option value="breakdown">Breakdown by Group</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-action btn-sm">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="summary_chart" style="display: block;">
+                <canvas id="SummaryChart" width="400" height="150"></canvas>
+            </div>
+            <div id="breakdown_chart" style="display: none;">
+                <canvas id="BreakdownChart" width="400" height="150"></canvas>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -67,16 +104,28 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
 <script>
+$("#controller").on("submit", function(e){
+    e.preventDefault();
+    start_date = $("#start_date").val();
+    end_date = $("#end_date").val();
 
-function get_chart_data(){
+    chart = $("#chart").val();
+
+    if(chart == "summary"){
+        summary_chart(ctx, myChart, start_date, end_date);
+    } else if(chart == "breakdown"){
+        breakdown_chart(ctx, myChart, start_date, end_date);
+    }
+});
+
+function get_chart_data(url){
     var data;
     $.ajax({
         async: false,
-        url: "api/chart_data",
+        url: url,
         type: 'get',
         success: function(result){
             data = result;
-            console.log(result);
         },
         error: function(){
             console.log("Error!");
@@ -85,52 +134,135 @@ function get_chart_data(){
     return data;
 }
 
-data = get_chart_data();
+var ctx = document.getElementById("SummaryChart").getContext('2d');
+var myChart;
 
-var ctx = document.getElementById("myChart").getContext('2d');
-var myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: data.dates,
-        datasets: [{
-            label: 'Calories',
-            data: data.calories,
-            label: 'kCal',
-            yAxisID: 'A',
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-            ],
-            borderWidth: 1
-        },{
-            label: 'Minutes',
-            data: data.minutes,
-            label: 'min',
-            yAxisID: 'B',
-            backgroundColor: [
-                'rgba(132, 99, 255, 0.2)',
-            ],
-            borderColor: [
-                'rgba(132,99,255,1)',
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-          yAxes: [{
-            id: 'A',
-            type: 'linear',
-            position: 'left',
-          }, {
-            id: 'B',
-            type: 'linear',
-            position: 'right',
-          }]
-        }
+function summary_chart(ctx, myChart, start_date, end_date){
+    url = "api/chart_data?foo=bar";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
     }
-});
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+
+    try {
+        myChart.destroy();
+    } catch(err) {
+        // do nothing
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: [{
+                label: 'Calories',
+                data: data.calories,
+                label: 'kCal',
+                yAxisID: 'A',
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                ],
+                borderWidth: 1
+            },{
+                label: 'Minutes',
+                data: data.minutes,
+                label: 'min',
+                yAxisID: 'B',
+                backgroundColor: [
+                    'rgba(132, 99, 255, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(132,99,255,1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+              yAxes: [{
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+              }, {
+                id: 'B',
+                type: 'linear',
+                position: 'right',
+              }]
+            }
+        }
+    });
+
+    return myChart;
+}
+
+function breakdown_chart(ctx, myChart, start_date, end_date){
+    url = "api/breakdown?foo";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+
+    try {
+        myChart.destroy();
+    } catch(err) {
+        // do nothing
+    }
+
+    data = get_chart_data(url);
+
+    try {
+        myChart.destroy();
+    } catch(err) {
+        // do nothing
+    }
+
+    // create the datasets
+    datasets = []
+    for(var i=0; i < data.groups.length; i++){
+       group = {
+            label: data.groups[i],
+            data: data.data[data.groups[i]].minutes,
+            yAxisID: 'A',
+            borderWidth: 1,
+            backgroundColor: data.data[data.groups[i]].color,
+       }
+       datasets.push(group);
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.dates,
+            datasets: datasets,
+        },
+        options: {
+            scales: {
+              yAxes: [{
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                stacked: true,
+              }],
+              xAxes: [{
+                stacked: true,
+              }]
+            }
+        }
+    });
+
+    return myChart;
+}
+
+var myChart = summary_chart(ctx, myChart);
+
 </script>
 {% endblock %}
