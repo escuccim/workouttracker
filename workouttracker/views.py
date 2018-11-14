@@ -3,37 +3,20 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.forms.models import model_to_dict
 import io
 import base64
 import numpy as np
 import datetime
-from .models import WorkoutSummary, MuscleGroup
+from .models import WorkoutSummary, MuscleGroup, WorkoutDetail
 
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
 
-# convert a plot to a datastream
-def fig_to_base64(fig):
-    img = io.BytesIO()
-    fig.savefig(img, format='png', bbox_inches='tight')
-    img.seek(0)
+def time_to_string(date):
+    return str(date.hour).zfill(2) + ":" + str(date.minute).zfill(2)
 
-    return base64.b64encode(img.getvalue())
-
-# Create your views here.
-def Index(request):
-    user = request.user
-    workouts = WorkoutSummary.workouts_by_day(user=user)
-    summaries = WorkoutSummary.summary_by_day(user=user)
-
-    start_date = request.GET.get('start', (datetime.datetime.now() - datetime.timedelta(days=7)).date())
-    end_date = request.GET.get('end', datetime.datetime.now().date())
-
-    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date)})
-
-def ChartData(request):
-    user = request.user
-    # get our start and end dates from URL or default to one week up to and including today
+def get_dates_from_request(request):
     start_date = request.GET.get('start', None)
     end_date = request.GET.get('end', None)
 
@@ -47,6 +30,31 @@ def ChartData(request):
     else:
         end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
 
+    return start_date, end_date
+
+# convert a plot to a datastream
+def fig_to_base64(fig):
+    img = io.BytesIO()
+    fig.savefig(img, format='png', bbox_inches='tight')
+    img.seek(0)
+
+    return base64.b64encode(img.getvalue())
+
+# Create your views here.
+def Index(request):
+    user = request.user
+    start_date, end_date = get_dates_from_request(request)
+
+    workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
+    summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
+
+    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date)})
+
+def ChartData(request):
+    user = request.user
+    # get our start and end dates from URL or default to one week up to and including today
+    start_date, end_date = get_dates_from_request(request)
+
     # create a list of dates between start and end, inclusive
     dates = []
     date = start_date
@@ -55,7 +63,7 @@ def ChartData(request):
         date += datetime.timedelta(days=1)
     dates.append(date)
 
-    summaries = WorkoutSummary.summary_by_day(user=user)
+    summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
 
     # get the total minutes and calories for each day in the dates
     calories_list = np.zeros_like(dates)
@@ -73,18 +81,7 @@ def ChartData(request):
 def ExerciseBreakdown(request):
     user = request.user
     # get our start and end dates from URL or default to one week up to and including today
-    start_date = request.GET.get('start', None)
-    end_date = request.GET.get('end', None)
-
-    if start_date == None:
-        start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
-    else:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-
-    if end_date == None:
-        end_date = datetime.datetime.now().date()
-    else:
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+    start_date, end_date = get_dates_from_request(request)
 
     # create a list of dates between start and end, inclusive
     dates = []
@@ -96,7 +93,7 @@ def ExerciseBreakdown(request):
 
     print(dates)
 
-    workouts = WorkoutSummary.workouts_by_day(user=user)
+    workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     major_groups = MuscleGroup.objects.filter(parent_id=None).order_by("area__order", "name")
 
     # make a list of all the major muscle groups
@@ -124,3 +121,35 @@ def ExerciseBreakdown(request):
 
 
     return JsonResponse({'dates': dates, 'groups': muscle_groups, 'data': data_dict }, safe=False)
+
+def WorkoutDetails(request):
+    user = request.user
+    start_date, end_date = get_dates_from_request(request)
+
+    workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
+    summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
+
+    dates = summaries['dates']
+    workouts_dict = {}
+    for date in dates:
+        if date in workouts:
+            for workout in workouts[date]:
+                if date in workouts_dict:
+                    workouts_dict[date].append({'id': workout.id, 'calories': workout.calories, 'time': time_to_string(workout.start), 'start': date_to_string(workout.start), 'minutes': workout.duration, 'group': workout.group.name})
+                else:
+                    workouts_dict[date] = [{'id': workout.id, 'calories': workout.calories, 'time': time_to_string(workout.start),  'start': date_to_string(workout.start), 'minutes': workout.duration, 'group': workout.group.name}]
+
+    return JsonResponse({'dates': dates, 'summaries': summaries, 'workouts': workouts_dict }, safe=False)
+
+def ExerciseDetails(request, id):
+    user = request.user
+
+    details = WorkoutDetail.objects.filter(workout_id=id).filter(workout__user_id=user.id)
+    data = []
+
+    for workout in details:
+        dict = model_to_dict(workout)
+        dict['exercise'] = workout.exercise.name
+        data.append(dict)
+
+    return JsonResponse(data, safe=False)

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .models import MuscleGroup, WorkoutSummary, Exercise, WorkoutDetail, WeightHistory, BodyAreas
+from .models import MuscleGroup, WorkoutSummary, Exercise, WorkoutDetail, WeightHistory, BodyAreas, UserProfile
 from .forms import MuscleGroupForm
 from django.contrib.auth.models import User
 
@@ -49,3 +49,4 @@ admin.site.register(WorkoutSummary, WorkoutAdmin)
 admin.site.register(WorkoutDetail)
 admin.site.register(Exercise, ExerciseAdmin)
 admin.site.register(WeightHistory)
+admin.site.register(UserProfile)

@@ -6,6 +6,63 @@ from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 import datetime
 
+def calories_burned_strength(summary):
+    # get maximum heart rate
+    user = UserProfile.objects.filter(user_id=summary.user_id).first()
+
+    if user.gender == "M":
+        max_hr = (202 - (.55 * user.age))
+    else:
+        max_hr = (216 - (1.09 * user.age))
+
+    # figure out the heart rate
+    hr_multiplier = 0.5 + (summary.intensity * .075)
+
+    hr_for_intensity = max_hr * hr_multiplier
+    weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
+
+    if user.gender == "M":
+        calories_burned = ( (user.age * .2017) - (weight.weight * 0.09036) + (hr_for_intensity * 0.6309) - 55.0969 ) * summary.duration / 4.184
+    else:
+        calories_burned = ((user.age * 0.074) - (weight.weight * 0.05741) + (hr_for_intensity * 0.4472) - 20.4022) * summary.duration / 4.184
+
+    return calories_burned
+
+def calories_burned_cardio(summary):
+    # get maximum heart rate
+    user = UserProfile.objects.filter(user_id=summary.user_id).first()
+
+    if user.gender == "M":
+        max_hr = (202 - (.55 * user.age))
+    else:
+        max_hr = (216 - (1.09 * user.age))
+
+    # figure out the heart rate
+    hr_multiplier = 0.55 + (summary.intensity * .075)
+
+    hr_for_intensity = max_hr * hr_multiplier
+    weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
+
+    if user.gender == "M":
+        calories_burned = ((-55.0969 + (0.6309 * hr_for_intensity) + (0.1988 * weight.weight) + (0.2017 * user.age))/4.184) * summary.duration
+    else:
+        calories_burned = ((-20.4022 + (0.4472 * hr_for_intensity) - (0.1263 * weight.weight) + (0.074 * user.age))/4.184) * summary.duration
+    print(calories_burned)
+
+    return calories_burned
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User)
+    gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default="M")
+    daily_target = models.IntegerField(default=30)
+    height = models.FloatField(default=80)
+    age = models.IntegerField(default=40)
+
+    def __unicode__(self):
+        return self.user.first_name
+
+
 class BodyAreas(models.Model):
     name = models.CharField(max_length=50)
     order = models.IntegerField(default=0)
@@ -81,13 +138,27 @@ class WorkoutSummary(models.Model):
     group = models.ForeignKey(MuscleGroup, on_delete=models.DO_NOTHING)
     calories = models.IntegerField(default=0)
     user = models.ForeignKey(User)
+    intensity = models.IntegerField(choices=((0, 'Very Low'), (1, 'Low'), (2, 'Moderate'), (3, 'High')), default=2)
+    calculated_calories = models.IntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        # if the exercise is cardio calculate the calories burned
+        if self.group_id == 20:
+            self.calculated_calories = calories_burned_cardio(self)
+        else:
+            self.calculated_calories = calories_burned_strength(self)
+
+        # save the relationship as normal
+        super(WorkoutSummary, self).save(*args, **kwargs)
 
     @staticmethod
     def workouts_by_day(user, end_date=None, start_date=None):
         if start_date is None:
             start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
         if end_date is None:
-            end_date = datetime.datetime.now()
+            end_date = datetime.datetime.now().date()
+
+        end_date = (end_date + datetime.timedelta(days=1))
 
         workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date)
 
@@ -107,7 +178,9 @@ class WorkoutSummary(models.Model):
         if start_date is None:
             start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
         if end_date is None:
-            end_date = datetime.datetime.now()
+            end_date = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
+
+        end_date = (end_date + datetime.timedelta(days=1))
 
         workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date)
 
