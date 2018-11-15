@@ -63,10 +63,10 @@ def calories_burned_cardio(summary):
 
 def calories_by_mets(summary):
     # check if there are exercises associated with the workout
-    exercise = summary.workoutdetail_set.first()
+    exercise_set = summary.workoutdetail_set
 
     # if the summary has exercises we can use the mets to calculate the calories
-    if exercise != None:
+    if exercise_set.first() != None:
         # get the info we need
         user = UserProfile.objects.filter(user_id=summary.user_id).first()
         weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
@@ -74,18 +74,26 @@ def calories_by_mets(summary):
         # calculate the user's base mets
         base_mets = 3.5 * weight.weight / 200
 
-        # get the intensity for the exercise
-        intensity = exercise.intensity
+        # calculate the mets as an average of the mets for each
+        # exercise at it's intensity
+        exercise_count = 0
+        mets_total = 0
 
-        # get the mets for the exercise
-        if intensity == 0:
-            mets = exercise.exercise.low_mets / 2
-        elif intensity == 1:
-            mets = exercise.exercise.low_mets
-        elif intensity == 2:
-            mets = exercise.exercise.med_mets
-        elif intensity == 3:
-            mets = exercise.exercise.high_mets
+        for exercise in exercise_set.all():
+            # get the mets for the exercise
+            if exercise.intensity == 0:
+                mets = exercise.exercise.low_mets / 2
+            elif exercise.intensity == 1:
+                mets = exercise.exercise.low_mets
+            elif exercise.intensity == 2:
+                mets = exercise.exercise.med_mets
+            elif exercise.intensity == 3:
+                mets = exercise.exercise.high_mets
+
+            mets_total += mets
+            exercise_count += 1
+
+        mets = mets_total / exercise_count
 
         calories_burned = mets * summary.duration * base_mets
 
@@ -123,10 +131,11 @@ class BodyAreas(models.Model):
         verbose_name_plural = "Body Areas"
 
 class WeightHistory(models.Model):
-    user = models.OneToOneField(User)
+    user = models.ForeignKey(User)
     datetime = models.DateTimeField()
     weight = models.FloatField(default=0)
     units = models.CharField(max_length=5, choices=(("kg","kg"), ("lbs", "lbs")))
+    bodyfat = models.FloatField(default=0)
 
     class Meta:
         ordering = ['datetime']

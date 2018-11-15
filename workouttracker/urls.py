@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^api/breakdown', views.ExerciseBreakdown, name="chart_breakdown"),
     url(r'^api/details', views.WorkoutDetails, name="workout_details"),
     url(r'^api/exercise_detail/(?P<id>\d+)', views.ExerciseDetails, name="exercise_detail"),
+    url(r'^api/weight', views.WeightDetails, name="weight_detail"),
 ]

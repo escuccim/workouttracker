@@ -9,7 +9,7 @@ import io
 import base64
 import numpy as np
 import datetime
-from .models import WorkoutSummary, MuscleGroup, WorkoutDetail
+from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory
 
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
@@ -17,12 +17,12 @@ def date_to_string(date):
 def time_to_string(date):
     return str(date.hour).zfill(2) + ":" + str(date.minute).zfill(2)
 
-def get_dates_from_request(request):
+def get_dates_from_request(request, offset=7):
     start_date = request.GET.get('start', None)
     end_date = request.GET.get('end', None)
 
     if start_date == None:
-        start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+        start_date = (datetime.datetime.now() - datetime.timedelta(days=offset)).date()
     else:
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
 
@@ -157,3 +157,19 @@ def ExerciseDetails(request, id):
         data.append(dict)
 
     return JsonResponse(data, safe=False)
+
+def WeightDetails(request):
+    start_date, end_date = get_dates_from_request(request, offset=30)
+    print(start_date)
+
+    user = request.user
+    weights = WeightHistory.objects.filter(user=user).filter(datetime__gte=start_date).filter(datetime__lte=end_date)
+
+    weight_dict = {'dates': [], 'weights': [], 'bodyfats': []}
+    for weight in weights:
+        date_str = date_to_string(weight.datetime)
+        weight_dict['dates'].append(date_str)
+        weight_dict['weights'].append(weight.weight)
+        weight_dict['bodyfats'].append(weight.bodyfat)
+
+    return JsonResponse(weight_dict, safe=False)

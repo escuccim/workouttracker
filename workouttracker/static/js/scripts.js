@@ -18,6 +18,8 @@ $("#controller").on("submit", function(e){
         update_details(start_date, end_date);
     } else if(chart == "totals"){
         display_summary(start_date, end_date);
+    } else if(chart == "weight"){
+        weight_chart(ctx, myChart, start_date, end_date);
     }
 });
 
@@ -210,6 +212,97 @@ function breakdown_chart(ctx, myChart, start_date, end_date){
               xAxes: [{
                 stacked: true,
               }]
+            }
+        }
+    });
+
+    return myChart;
+}
+
+function weight_chart(ctx, myChart, start_date, end_date){
+    url = "api/weight?foo";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+    console.log(data.weights);
+    try {
+        ctx = clearChart();
+    } catch(err) {
+        console.log(err);
+    }
+    datasets = [{
+                label: 'Weight',
+                data: data.weights,
+                yAxisID: 'A',
+                backgroundColor: [
+                    'rgba(255, 19, 120, 0.1)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 2
+            }];
+
+     yAxes = [{
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                scaleLabel:{
+                    display: true,
+                    labelString: 'kg',
+                }
+              }];
+
+    bodyfat_values_present = false;
+
+    // create the body fat dataset if there is any data there
+    for(var i=0; i<data.bodyfats.length;i++){
+        if(data.bodyfats[i] != 0){
+            bodyfat_values_present = true;
+            break;
+        }
+    }
+
+    if(bodyfat_values_present){
+        bodyfat_dataset = {
+                label: 'Body Fat %',
+                data: data.bodyfats,
+                yAxisID: 'B',
+                backgroundColor: [
+                    'rgba(120, 99, 255, 0.1)',
+                ],
+                borderColor: [
+                    'rgba(132,99,255,1)',
+                ],
+                borderWidth: 2
+            }
+        datasets.push(bodyfat_dataset);
+        yScale = {
+                id: 'B',
+                type: 'linear',
+                position: 'right',
+                scaleLabel:{
+                    display: true,
+                    labelString: '%',
+                }
+              };
+        yAxes.push(yScale);
+    }
+
+    // create the datasets
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: datasets
+        },
+        options: {
+            scales: {
+              yAxes: yAxes,
             }
         }
     });
