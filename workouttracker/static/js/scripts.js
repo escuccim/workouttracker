@@ -38,10 +38,18 @@ $(".date-filter-button").on("click", function(e){
     $(this).removeClass("btn-secondary");
 
     start_date = new Date($("#end_date").val());
-    start_date.setDate(start_date.getDate()-value);
 
     // convert the date into a properly formatted string
-    date_string = start_date.getFullYear() + "-" + (start_date.getMonth()+1).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
+    date_string = start_date.getFullYear() + "-"
+    if(value == 7){
+        start_date.setDate(start_date.getDate()-value);
+        date_string += (start_date.getMonth()+1).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
+    } else if(value == 365){
+        date_string += '01-01';
+    } else if(value == 30){
+        date_string += (start_date.getMonth()+1).toString().padStart(2, '0') + "-01";
+    }
+
 
     $("#start_date").val(date_string);
     $("#controller").trigger("submit");
