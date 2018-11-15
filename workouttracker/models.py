@@ -90,9 +90,19 @@ def calories_by_mets(summary):
             elif exercise.intensity == 3:
                 mets = exercise.exercise.high_mets
 
-            mets_total += mets
-            exercise_count += 1
+            # weight the mets by the duration or the number of total reps
+            if exercise.reps != 0 and exercise.sets != 0:
+                weight = exercise.reps * exercise.sets
+            elif exercise.duration != 0:
+                weight = exercise.duration
+            else:
+                weight = 1
 
+            mets_total += (mets * weight)
+            exercise_count += weight
+
+        print("mets_total:", mets_total)
+        print("exercise_count:", exercise_count)
         mets = mets_total / exercise_count
 
         calories_burned = mets * summary.duration * base_mets

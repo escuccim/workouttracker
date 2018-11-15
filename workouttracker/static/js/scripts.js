@@ -23,6 +23,30 @@ $("#controller").on("submit", function(e){
     }
 });
 
+// the date filter buttons
+$(".date-filter-button").on("click", function(e){
+    e.preventDefault();
+    value = $(this).data("val");
+
+    // activate the appropriate button
+    old_button = $(":button.btn-success");
+    old_button.addClass("btn-secondary");
+    old_button.removeClass("btn-success");
+    $(".date-filter-button").removeClass("active");
+    $(this).addClass("active");
+    $(this).addClass("btn-success");
+    $(this).removeClass("btn-secondary");
+
+    start_date = new Date($("#end_date").val());
+    start_date.setDate(start_date.getDate()-value);
+
+    // convert the date into a properly formatted string
+    date_string = start_date.getFullYear() + "-" + (start_date.getMonth()+1).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
+
+    $("#start_date").val(date_string);
+    $("#controller").trigger("submit");
+});
+
 $(document).on("click", ".expand_detail", function(e){
     id = $(this).data("val");
     url = "api/exercise_detail/" + id;
