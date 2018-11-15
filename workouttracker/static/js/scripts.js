@@ -1,3 +1,5 @@
+var intensities = ['Very Low', 'Low', 'Moderate', 'High']
+
 $("#controller").on("submit", function(e){
     e.preventDefault();
     start_date = $("#start_date").val();
@@ -14,6 +16,8 @@ $("#controller").on("submit", function(e){
         breakdown_chart(ctx, myChart, start_date, end_date);
     } else if(chart == "details"){
         update_details(start_date, end_date);
+    } else if(chart == "totals"){
+        display_summary(start_date, end_date);
     }
 });
 
@@ -29,9 +33,14 @@ function display_exercise_detail(id, data){
     html = "<div class='col-md-12'>";
     for(var i = 0; i < data.length; i++){
         html += '<div class="row"><div class="col-md-3"></div><div class="col-md-2">' + data[i].exercise + '</div>';
-        html += '<div class="col-md-2">' + data[i].sets + ' sets</div>';
-        html += '<div class="col-md-2">' + data[i].reps + ' reps</div>';
-        html += '<div class="col-md-2">' + data[i].weight + ' kg</div>';
+        if(data[i].sets != 0 && data[i].reps != 0){
+            html += '<div class="col-md-2">' + data[i].sets + ' sets</div>';
+            html += '<div class="col-md-2">' + data[i].reps + ' reps</div>';
+            html += '<div class="col-md-2">' + data[i].weight + ' kg</div>';
+        } else {
+            html += '<div class="col-md-2">' + data[i].duration + ' mins</div>';
+            html += '<div class="col-md-2">' + intensities[data[i].intensity] + ' intensity</div>';
+        }
         html += '</div>';
     }
     if(data.length == 0){
@@ -96,24 +105,24 @@ function summary_chart(ctx, myChart, start_date, end_date){
                 label: 'kCal',
                 yAxisID: 'A',
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 19, 120, 0.1)',
                 ],
                 borderColor: [
-                    'rgba(255,99,132,1)',
+                    'rgba(255, 99, 132, 1)',
                 ],
-                borderWidth: 1
+                borderWidth: 2
             },{
                 label: 'Minutes',
                 data: data.minutes,
                 label: 'min',
                 yAxisID: 'B',
                 backgroundColor: [
-                    'rgba(132, 99, 255, 0.2)',
+                    'rgba(120, 99, 255, 0.1)',
                 ],
                 borderColor: [
                     'rgba(132,99,255,1)',
                 ],
-                borderWidth: 1
+                borderWidth: 2
             }]
         },
         options: {
@@ -175,6 +184,7 @@ function breakdown_chart(ctx, myChart, start_date, end_date){
             yAxisID: 'A',
             borderWidth: 1,
             backgroundColor: data.data[data.groups[i]].color,
+            borderColor: "#000",
        }
        datasets.push(group);
     }
@@ -226,8 +236,6 @@ function update_details(start_date, end_date){
         // do nothing
     }
 
-    data = get_chart_data(url);
-
     html = '<div class="col-md-12"><div class="panel-group" id="accordion">';
     // create our new HTML
     for(var i=0; i<data.dates.length; i++){
@@ -251,6 +259,77 @@ function update_details(start_date, end_date){
     }
 
     html += '</div></div>';
+    $("#details").html(html);
+}
+
+function display_summary(start_date, end_date){
+    $("#charts").hide();
+    $("#details").show();
+
+    url = "api/breakdown?foo";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+
+    try {
+        myChart.destroy();
+    } catch(err) {
+        // do nothing
+    }
+
+    data = get_chart_data(url);
+
+    // create our table and headers
+    html = '<div class="col-md-12"><table class="table table-striped">';
+    html += '<thead><tr><th>Date</th>';
+    totals = {}
+    for(var i=0; i<data.groups.length;i++){
+        html += '<th colspan="1" width="9%">' + data.groups[i] + '</th>';
+
+        // while we are looping through groups also create a struct to hold the weekly totals
+        totals[data.groups[i]] = 0;
+    }
+    totals['total'] = 0;
+
+    html += '<th>Total</th></thead></tr>';
+
+    // populate the table
+    for(var i=0; i<data.dates.length; i++){
+        html += '<tr><td>' + data.dates[i] + '</td>';
+        day_total = 0;
+        for(var j=0; j<data.groups.length;j++){
+            group = data.groups[j];
+
+            // increment our daily total
+            day_total += data.data[group]['minutes'][i];
+            totals['total'] += data.data[group]['minutes'][i];
+            // increment the total per group
+            totals[group] += data.data[group]['minutes'][i];
+
+            if(data.data[group]['minutes'][i] != 0){
+                html += '<td>' + data.data[group]['minutes'][i] + ' min</td>';
+            } else {
+                html += '<td> - </td>';
+            }
+        }
+        html += '<td>' + day_total + ' min</td>';
+        html += '</tr>';
+    }
+
+    html += '<tr class="total_row"><td><b>Total:</b></td>';
+    // display the totals per group
+    for(var i=0; i<data.groups.length;i++){
+        html += '<td>' + totals[data.groups[i]] + ' min</td>';
+
+        // while we are looping through groups also create a struct to hold the weekly totals
+        totals[data.groups[i]] = 0;
+    }
+    html += '<td>' + totals['total'] + ' min</td>';
+
+    html += '</tr></table></div>';
     $("#details").html(html);
 }
 

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.forms.models import model_to_dict
+from django.conf import settings
 import io
 import base64
 import numpy as np
@@ -42,6 +43,9 @@ def fig_to_base64(fig):
 
 # Create your views here.
 def Index(request):
+    if not request.user.is_authenticated:
+        return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
     user = request.user
     start_date, end_date = get_dates_from_request(request)
 
