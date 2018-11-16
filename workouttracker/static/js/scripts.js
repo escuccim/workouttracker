@@ -60,27 +60,70 @@ $(document).on("click", ".expand_detail", function(e){
     url = "api/exercise_detail/" + id;
     data = get_chart_data(url);
     display_exercise_detail(id, data);
+    // get the current content of the controller which indicates if it's open or closed
+    current_html = $(this).html();
+    // set them all to closed
+    $(".expand_detail").html("+");
+    // if this was closed set it to open
+    if(current_html == "+"){
+        $(this).html("-");
+    }
 });
 
 function display_exercise_detail(id, data){
     $(".exercise_detail").hide();
-    html = "<div class='col-md-12'>";
-    for(var i = 0; i < data.length; i++){
-        html += '<div class="row"><div class="col-md-3"></div><div class="col-md-2">' + data[i].exercise + '</div>';
-        if(data[i].sets != 0 && data[i].reps != 0){
-            html += '<div class="col-md-2">' + data[i].sets + ' sets</div>';
-            html += '<div class="col-md-2">' + data[i].reps + ' reps</div>';
-            html += '<div class="col-md-2">' + data[i].weight + ' kg</div>';
-        } else {
-            html += '<div class="col-md-2">' + data[i].duration + ' mins</div>';
-            html += '<div class="col-md-2">' + intensities[data[i].intensity] + ' intensity</div>';
-        }
-        html += '</div>';
+
+    // check if the exercises are cardio or strength
+    if(data[0].sets == 0 && data[0].reps == 0){
+        cardio = true;
+
+        total_duration = 0;
+        total_calories = 0;
+    } else {
+        cardio = false;
+
+        total_weight_moved = 0;
+        total_sets = 0;
+        total_reps = 0;
     }
+
+    if(cardio){
+        html = '<div class="col-md-10 col-md-offset-1"><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Duration (min)</th><th class="text-right">Intensity</th><th class="text-right">Calories</th></tr></thead>';
+    } else {
+        html = '<div class="col-md-10 col-md-offset-1"><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Weight</th><th class="text-right">Weight Moved</th></tr></thead>';
+    }
+
+    for(var i = 0; i < data.length; i++){
+        html += '<tr><td>' + data[i].exercise + '</td>';
+        if(data[i].sets != 0 && data[i].reps != 0){
+            html += '<td class="text-right">' + data[i].sets + '</td>';
+            html += '<td class="text-right">' + data[i].reps + '</td>';
+            html += '<td class="text-right">' + data[i].weight + ' kg</td>';
+            html += '<td class="text-right">' + (data[i].weight * data[i].reps * data[i].sets) + ' kg</td>';
+            total_weight_moved += (data[i].weight * data[i].reps * data[i].sets);
+            total_sets += data[i].sets;
+            total_reps += data[i].reps;
+        } else {
+            html += '<td class="text-right">' + data[i].duration + '</td>';
+            html += '<td class="text-right">' + intensities[data[i].intensity] + '</td>';
+            html += '<td class="text-right">' + data[i].calories + '</td>';
+            total_duration += data[i].duration;
+            total_calories += data[i].calories;
+
+        }
+        html += '</tr>';
+    }
+    if(cardio){
+        html += '<tr><td><b>Totals</b></td><td class="text-right">' + total_duration + '</td><td class="text-right">-</td><td class="text-right">' + total_calories + '</td></tr>';
+    } else {
+        html += '<tr><td><b>Totals</b></td><td class="text-right">' + total_sets + '</td><td class="text-right">' + total_reps + '</td><td class="text-right">-</td><td class="text-right">' + total_weight_moved + ' kg</td></tr>';
+    }
+
+
     if(data.length == 0){
         html += '<div class="row"><div class="col-md-3"></div><div class="col-md-9">No details available</div></div>';
     }
-    html += '</div>';
+    html += '</table></div>';
     $("#detail_"+id).html(html);
     $("#detail_"+id).show();
 }
@@ -375,8 +418,8 @@ function update_details(start_date, end_date){
             html += '<div class="col-md-1">' + data.workouts[data.dates[i]][j]['time'] + '</div>';
             html += '<div class="col-md-2">' + data.workouts[data.dates[i]][j].group + '</div><div class="col-md-2">'  +data.workouts[data.dates[i]][j].minutes + ' mins</div>';
             html += '<div class="col-md-2">' +  data.workouts[data.dates[i]][j].calories + ' kCal</div>';
-            html += '<div class="col-md-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" class="expand_detail">+</a></div></div>';
-            html += '<div class="row exercise_detail well" style="display: none;" id="detail_' + data.workouts[data.dates[i]][j].id + '"></div>';
+            html += '<div class="col-md-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail">+</a></div></div>';
+            html += '<div class="row exercise_detail" style="display: none;" id="detail_' + data.workouts[data.dates[i]][j].id + '"></div>';
         }
 
         html += '</div>';

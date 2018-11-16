@@ -57,9 +57,29 @@ def calories_burned_cardio(summary):
         calories_burned = ((-55.0969 + (0.6309 * hr_for_intensity) + (0.1988 * weight.weight) + (0.2017 * user.age))/4.184) * summary.duration
     else:
         calories_burned = ((-20.4022 + (0.4472 * hr_for_intensity) - (0.1263 * weight.weight) + (0.074 * user.age))/4.184) * summary.duration
-    print(calories_burned)
 
     return calories_burned
+
+def calories_for_exercise(exercise):
+    # get the mets for the exercise
+    if exercise.intensity == 0:
+        mets = exercise.exercise.low_mets / 2
+    elif exercise.intensity == 1:
+        mets = exercise.exercise.low_mets
+    elif exercise.intensity == 2:
+        mets = exercise.exercise.med_mets
+    elif exercise.intensity == 3:
+        mets = exercise.exercise.high_mets
+
+    # weight the mets by the duration or the number of total reps
+    if exercise.reps != 0 and exercise.sets != 0:
+        weight = exercise.reps * exercise.sets
+    elif exercise.duration != 0:
+        weight = exercise.duration
+    else:
+        weight = 1
+
+    return mets, weight
 
 def calories_by_mets(summary):
     # check if there are exercises associated with the workout
@@ -69,10 +89,7 @@ def calories_by_mets(summary):
     if exercise_set.first() != None:
         # get the info we need
         user = UserProfile.objects.filter(user_id=summary.user_id).first()
-        weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
-
-        # calculate the user's base mets
-        base_mets = 3.5 * weight.weight / 200
+        base_mets = user.get_base_mets()
 
         # calculate the mets as an average of the mets for each
         # exercise at it's intensity
@@ -80,29 +97,11 @@ def calories_by_mets(summary):
         mets_total = 0
 
         for exercise in exercise_set.all():
-            # get the mets for the exercise
-            if exercise.intensity == 0:
-                mets = exercise.exercise.low_mets / 2
-            elif exercise.intensity == 1:
-                mets = exercise.exercise.low_mets
-            elif exercise.intensity == 2:
-                mets = exercise.exercise.med_mets
-            elif exercise.intensity == 3:
-                mets = exercise.exercise.high_mets
+            exercise_mets, weight = calories_for_exercise(exercise)
 
-            # weight the mets by the duration or the number of total reps
-            if exercise.reps != 0 and exercise.sets != 0:
-                weight = exercise.reps * exercise.sets
-            elif exercise.duration != 0:
-                weight = exercise.duration
-            else:
-                weight = 1
-
-            mets_total += (mets * weight)
+            mets_total += exercise_mets * weight
             exercise_count += weight
 
-        print("mets_total:", mets_total)
-        print("exercise_count:", exercise_count)
         mets = mets_total / exercise_count
 
         calories_burned = mets * summary.duration * base_mets
@@ -117,7 +116,6 @@ def calories_by_mets(summary):
     return calories_burned
 
 
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default="M")
@@ -128,6 +126,10 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.first_name
 
+    def get_base_mets(self):
+        weight = WeightHistory.objects.filter(user_id=self.user_id).last()
+        base_mets = 3.5 * weight.weight / 200
+        return base_mets
 
 class BodyAreas(models.Model):
     name = models.CharField(max_length=50)
@@ -192,6 +194,20 @@ class WorkoutDetail(models.Model):
     weight = models.FloatField(default=0)
     duration = models.FloatField(default=0)
     intensity = models.IntegerField(choices=((0, 'Very Low'), (1, 'Low'), (2, 'Moderate'), (3, 'High')), default=2)
+    calories = models.FloatField(default=0)
+
+    def save(self, *args, **kwargs):
+        # calculate the calories burned during this exercise session
+        exercise_mets, _ = calories_for_exercise(self)
+        user = UserProfile.objects.filter(user_id=self.workout.user_id).first()
+        base_mets = user.get_base_mets()
+
+        calories_burned = exercise_mets * self.duration * base_mets
+
+        self.calories = calories_burned
+
+        # save the relationship as normal
+        super(WorkoutDetail, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.workout.start) + " - " + self.workout.group.name + " - " + self.exercise.name
@@ -214,12 +230,7 @@ class WorkoutSummary(models.Model):
     avg_heartrate = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
-        # if the exercise is cardio calculate the calories burned
-        # if self.group_id == 20:
-        #     self.calculated_calories = calories_burned_cardio(self)
-        # else:
-        #     self.calculated_calories = calories_burned_strength(self)
-
+        # calculate the calories burned during this exercise sesssion
         self.calculated_calories = calories_by_mets(self)
 
         if self.calories == 0:
