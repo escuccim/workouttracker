@@ -17,12 +17,14 @@
                 </div>
             </div>
         {% endfor %}
+        <div class="row">
+            <div class="col-sm-12">
+                Exercises
+            </div>
+        </div>
         {% for field in exercise_form %}
             <div class="row" style="padding: 5px;">
-                <div class="col-sm-3">
-                    {{ field.label_tag }}
-                </div>
-                <div class="col-sm-9">
+                <div class="col-sm-12">
                      {{ field }}
                 </div>
             </div>

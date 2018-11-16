@@ -247,7 +247,6 @@ function breakdown_chart(ctx, myChart, start_date, end_date){
     if(end_date != undefined) {
         url += "&end=" + end_date;
     }
-    data = get_chart_data(url);
 
     try {
         ctx = clearChart();
@@ -313,8 +312,7 @@ function weight_chart(ctx, myChart, start_date, end_date){
     if(end_date != undefined) {
         url += "&end=" + end_date;
     }
-    data = get_chart_data(url);
-    console.log(data.weights);
+
     try {
         ctx = clearChart();
     } catch(err) {

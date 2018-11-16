@@ -186,8 +186,18 @@ def WeightDetails(request):
 
 def EditWorkoutSummary(request, pk):
     workout = WorkoutSummary.objects.filter(user=request.user).get(id=pk)
-    form = WorkoutSummaryForm(instance=workout)
-    # exercise_form = ExerciseFormSet(instance=workout)
-    exercise_form = []
 
-    return render(request, 'workouttracker/form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})
+    if request.method == 'POST':
+        form = WorkoutSummaryForm(request.POST)
+        exercise_form = ExerciseFormSet(instance=workout)
+
+        if form.is_valid():
+            pass
+        else:
+            return JsonResponse(form.errors)
+    else:
+        form = WorkoutSummaryForm(instance=workout)
+        exercise_form = ExerciseFormSet(instance=workout)
+
+
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})

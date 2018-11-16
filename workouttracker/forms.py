@@ -25,10 +25,16 @@ class MuscleGroupForm(ModelForm):
         }
 
 class WorkoutDetailForm(ModelForm):
+
     class Meta:
         model = WorkoutDetail
-        fields = ['reps', 'sets']
-
+        fields = ['exercise', 'reps', 'sets', 'weight', 'intensity', 'duration']
+        widgets = {
+            'reps': forms.TextInput(attrs={'size': 3}),
+            'sets': forms.TextInput(attrs={'size': 3}),
+            'weight': forms.TextInput(attrs={'size': 4}),
+            'duration': forms.TextInput(attrs={'size': 4}),
+        }
 class WorkoutSummaryForm(ModelForm):
     start = forms.DateTimeField(initial=datetime.now(), widget=AdminDateWidget())
     time = forms.DateTimeField(initial=datetime.now(), widget=AdminTimeWidget())
@@ -37,4 +43,4 @@ class WorkoutSummaryForm(ModelForm):
         model = WorkoutSummary
         fields = ['start', 'time', 'duration', 'calories', 'group', 'intensity', 'avg_heartrate', 'notes']
 
-ExerciseFormSet = []
+ExerciseFormSet = forms.inlineformset_factory(WorkoutSummary, WorkoutDetail,form=WorkoutDetailForm, extra=2,can_delete=True)
