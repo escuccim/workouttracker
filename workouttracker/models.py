@@ -117,7 +117,7 @@ def calories_by_mets(summary):
 
 
 class UserProfile(models.Model):
-    # user = models.OneToOneField(User)
+    user = models.ForeignKey(User)
     gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default="M")
     daily_target = models.IntegerField(default=30)
     height = models.FloatField(default=80)
