@@ -58,8 +58,7 @@ $(".date-filter-button").on("click", function(e){
 $(document).on("click", ".expand_detail", function(e){
     id = $(this).data("val");
     url = "api/exercise_detail/" + id;
-    data = get_chart_data(url);
-    display_exercise_detail(id, data);
+
     // get the current content of the controller which indicates if it's open or closed
     current_html = $(this).html();
     // set them all to closed
@@ -67,6 +66,12 @@ $(document).on("click", ".expand_detail", function(e){
     // if this was closed set it to open
     if(current_html == "+"){
         $(this).html("-");
+        data = get_chart_data(url);
+        display_exercise_detail(id, data);
+    }
+    // else if it's open close it
+    else {
+         $("#detail_"+id).hide();
     }
 });
 
@@ -208,6 +213,9 @@ function summary_chart(ctx, myChart, start_date, end_date){
                 id: 'A',
                 type: 'linear',
                 position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
                 scaleLabel: {
                     display: true,
                     labelString: 'Calories',
@@ -216,7 +224,10 @@ function summary_chart(ctx, myChart, start_date, end_date){
                 id: 'B',
                 type: 'linear',
                 position: 'right',
-               scaleLabel: {
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
                     display: true,
                     labelString: 'Minutes',
                 }
@@ -407,22 +418,22 @@ function update_details(start_date, end_date){
     html = '<div class="col-md-12"><div class="panel-group" id="accordion">';
     // create our new HTML
     for(var i=0; i<data.dates.length; i++){
-        html += '<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#'+data.dates[i] + '"><div class="row"><div class="col-md-2">' + data.dates[i] + '</div><div class="col-md-2">';
+        html += '<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#'+data.dates[i] + '"><div class="row"><div class="col-sm-2">' + data.dates[i] + '</div><div class="col-sm-2">';
         html += data.summaries.minutes[i] + ' mins </div><div class="col-md-2">';
         html += data.summaries.calories[i] + ' kCal </div></div></a></h4></div>';
 
-        html += '<div id="'+data.dates[i] + '" class="panel-collapse collapse"><div class="panel-body">';
+        html += '<div id="'+data.dates[i] + '" class="panel-collapse collapse"><div class="panel-body"><div class="row"><div class="col-sm-9 col-sm-offset-1">';
 
         for(var j=0; j < data.workouts[data.dates[i]].length; j++){
-            html += '<div class="row"><div class="col-md-2">' + data.workouts[data.dates[i]][j].start + '</div>';
-            html += '<div class="col-md-1">' + data.workouts[data.dates[i]][j]['time'] + '</div>';
-            html += '<div class="col-md-2">' + data.workouts[data.dates[i]][j].group + '</div><div class="col-md-2">'  +data.workouts[data.dates[i]][j].minutes + ' mins</div>';
-            html += '<div class="col-md-2">' +  data.workouts[data.dates[i]][j].calories + ' kCal</div>';
-            html += '<div class="col-md-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail">+</a></div></div>';
+            html += '<div class="row row_border">';
+            html += '<div class="col-sm-1">' + data.workouts[data.dates[i]][j]['time'] + '</div>';
+            html += '<div class="col-sm-2">' + data.workouts[data.dates[i]][j].group + '</div><div class="col-sm-2">'  +data.workouts[data.dates[i]][j].minutes + ' mins</div>';
+            html += '<div class="col-sm-2">' +  data.workouts[data.dates[i]][j].calories + ' kCal</div>';
+            html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail">+</a></div></div>';
             html += '<div class="row exercise_detail" style="display: none;" id="detail_' + data.workouts[data.dates[i]][j].id + '"></div>';
         }
 
-        html += '</div>';
+        html += '</div></div></div>';
         html += '</div></div>';
     }
 

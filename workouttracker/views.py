@@ -10,6 +10,7 @@ import base64
 import numpy as np
 import datetime
 from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory
+from .forms import WorkoutSummaryForm, ExerciseFormSet
 
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
@@ -173,3 +174,11 @@ def WeightDetails(request):
         weight_dict['bodyfats'].append(weight.bodyfat)
 
     return JsonResponse(weight_dict, safe=False)
+
+def EditWorkoutSummary(request, pk):
+    workout = WorkoutSummary.objects.filter(user=request.user).get(id=pk)
+    form = WorkoutSummaryForm(instance=workout)
+    # exercise_form = ExerciseFormSet(instance=workout)
+    exercise_form = []
+    
+    return render(request, 'workouttracker/form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})

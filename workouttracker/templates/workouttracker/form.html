@@ -1,0 +1,50 @@
+{% extends 'workouttracker/base.html' %}
+{% load dict_key %}
+{% load index %}
+{% load static %}
+
+{% block body %}
+<div class="container">
+    <form action="{% url 'workout:edit_workout_form' workout.id %}" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="row" style="padding: 5px;">
+                <div class="col-sm-3">
+                    {{ field.label_tag }}
+                </div>
+                <div class="col-sm-9">
+                     {{ field }}
+                </div>
+            </div>
+        {% endfor %}
+        {% for field in exercise_form %}
+            <div class="row" style="padding: 5px;">
+                <div class="col-sm-3">
+                    {{ field.label_tag }}
+                </div>
+                <div class="col-sm-9">
+                     {{ field }}
+                </div>
+            </div>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" href="/static/admin/css/widgets.css">
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+
+<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+<script type="text/javascript" src="/static/admin/js/actions.js"></script>
+<script type="text/javascript" src="/static/admin/js/urlify.js"></script>
+<script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>
+<script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>
+<script type="text/javascript" src="/static/admin/js/inlines.js"></script>
+{{ form.media }}
+{%endblock %}

@@ -195,6 +195,7 @@ class WorkoutDetail(models.Model):
     duration = models.FloatField(default=0)
     intensity = models.IntegerField(choices=((0, 'Very Low'), (1, 'Low'), (2, 'Moderate'), (3, 'High')), default=2)
     calories = models.FloatField(default=0)
+    distance = models.FloatField(default=0)
 
     def save(self, *args, **kwargs):
         # calculate the calories burned during this exercise session
@@ -229,7 +230,7 @@ class WorkoutSummary(models.Model):
     calculated_calories = models.IntegerField(default=0)
     avg_heartrate = models.IntegerField(default=0)
     notes = models.TextField(blank=True, null=True)
-    
+
     def save(self, *args, **kwargs):
         # calculate the calories burned during this exercise sesssion
         self.calculated_calories = calories_by_mets(self)
