@@ -35,11 +35,6 @@ class WorkoutSummaryForm(ModelForm):
 
     class Meta:
         model = WorkoutSummary
-        # fields = ['start', 'time', 'duration', 'calories', 'group', 'intensity', 'avg_heartrate', 'notes']
-        fields = '__all__'
-        # widgets = {
-        #     'start': AdminDateWidget(),
-        # }
+        fields = ['start', 'time', 'duration', 'calories', 'group', 'intensity', 'avg_heartrate', 'notes']
 
-
-ExerciseFormSet = forms.inlineformset_factory(WorkoutSummary, WorkoutDetail, form=WorkoutSummaryForm, extra=3)
+ExerciseFormSet = []

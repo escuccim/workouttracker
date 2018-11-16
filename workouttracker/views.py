@@ -106,21 +106,30 @@ def ExerciseBreakdown(request):
     data_dict = {}
     for group in major_groups:
         muscle_groups.append(group.name)
-        data_dict[group.name] = {'minutes': [], 'calories': [], 'color': group.color}
+        data_dict[group.name] = {'minutes': [], 'calories': [], 'color': group.color, 'dates': []}
 
-        for date in dates:
+        for i, date in enumerate(dates):
             date_str = date_to_string(date)
             found = False
             if date_str in workouts:
                 for workout in workouts[date_str]:
                     if workout.group.name == group.name:
-                        data_dict[group.name]['minutes'].append(workout.duration)
-                        data_dict[group.name]['calories'].append(workout.calories)
+                        if date_str not in data_dict[group.name]['dates']:
+                            data_dict[group.name]['minutes'].append(workout.duration)
+                            data_dict[group.name]['calories'].append(workout.calories)
+                            data_dict[group.name]['dates'].append(date_str)
+                        # handle multiple occurences of same exercise on a day
+                        else:
+                            print("Duplicate group", group.name)
+                            data_dict[group.name]['minutes'][i] += workout.duration
+                            data_dict[group.name]['calories'][i] += workout.calories
+
                         found = True
 
             if not found:
                 data_dict[group.name]['minutes'].append(0)
                 data_dict[group.name]['calories'].append(0)
+                data_dict[group.name]['dates'].append(date_str)
 
     # loop through the summaries and put them in day/group format
 
@@ -180,5 +189,5 @@ def EditWorkoutSummary(request, pk):
     form = WorkoutSummaryForm(instance=workout)
     # exercise_form = ExerciseFormSet(instance=workout)
     exercise_form = []
-    
+
     return render(request, 'workouttracker/form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})
