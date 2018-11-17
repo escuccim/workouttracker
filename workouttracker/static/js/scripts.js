@@ -23,13 +23,33 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(document).on("submit", "#edit_workout_form", function(e){
+    e.preventDefault();
+    console.log("submit!");
+    $.ajax({
+            url     : $(this).attr('action'),
+            type    : $(this).attr('method'),
+            dataType: 'json',
+            data    : $(this).serialize(),
+            success : function( data ) {
+                 if(data.success == true){
+                    $("#Modal").modal("hide");
+                 }
+            },
+            error   : function( xhr, err ) {
+                 console.log(err);
+            }
+        });
+});
+
 $(document).on("click", ".edit-workout", function(e){
     e.preventDefault();
     id = $(this).data("val");
 
     // get the form to show in the modal
     url = "edit_workout/" + id;
-    html = get_chart_data(url)
+    html = get_chart_data(url);
+//    $('body').trigger("load");
     $("#ModalLabel").html("Edit Workout");
     $("#ModalBody").html(html);
     $("#Modal").modal("show");

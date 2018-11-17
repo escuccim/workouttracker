@@ -2,41 +2,113 @@
 {% load static %}
 
 {% block body %}
-<div class="container">
+<!--<div class="container">-->
     {% if workout.id %}
-        <form action="{% url 'workout:edit_workout_form' workout.id %}" method="post">
+        <form action="{% url 'workout:edit_workout_form' workout.id %}" id="edit_workout_form" method="post">
     {% else %}
-        <form action="{% url 'workout:add_workout_form' %}" method="post">
+        <form action="{% url 'workout:add_workout_form' %}" id="add_workout_form" method="post">
     {% endif %}
         {% csrf_token %}
-        {% for field in form %}
-            <div class="row" style="padding: 5px;">
-                <div class="col-sm-3">
-                    {{ field.label_tag }}
-                </div>
-                <div class="col-sm-9">
-                     {{ field }}
-                </div>
-            </div>
-        {% endfor %}
+        <div class="row" style="padding: 5px;">
+            {% for field in form %}
+                {% if field.name != 'notes' %}
+                    <div class="col-sm-2">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="col-sm-4">
+                         {{ field }}
+                    </div>
+                {% else %}
+                    </div>
+                    <div class="row" style="padding: 5px;">
+                        <div class="col-sm-2">
+                            {{ field.label_tag }}
+                        </div>
+                        <div class="col-sm-10">
+                             {{ field }}
+                        </div>
+                {% endif %}
+            {% endfor %}
+        </div>
         <div class="row">
             <div class="col-sm-12">
                 Exercises
             </div>
         </div>
         {{ exercise_form.management_form }}
-        {% for field in exercise_form %}
+        <div class="row">
+            <div class="col-sm-3">
+                <label for="exercise">Exercise:</label>
+            </div>
+            <div class="col-sm-1">
+                <label for="reps">Reps:</label>
+            </div>
+            <div class="col-sm-1">
+                <label for="sets">Sets:</label>
+            </div>
+            <div class="col-sm-1">
+                <label for="weight">Weight:</label>
+            </div>
+            <div class="col-sm-3">
+                <label for="intensity">Intensity:</label>
+            </div>
+            <div class="col-sm-2">
+                <label for="duration">Duration:</label>
+            </div>
+            <div class="col-sm-1">
+                <label for="delete">Delete:</label>
+            </div>
+        </div>
+        {% for form in exercise_form %}
             <div class="row" style="padding: 5px;">
-                <div class="col-sm-12">
-                     {{ field }}
-                </div>
+                {% for field in form %}
+                    {% if field.name == "exercise" or field.name == "intensity" %}
+                        <div class="col-sm-3">
+                            {{ field }}
+                        </div>
+                    {% elif field.name == "duration" %}
+                        <div class="col-sm-2">
+                            {{ field }}
+                        </div>
+                    {% elif field.name == "id" %}
+                        {{ field }}
+                    {% elif field.name == "DELETE" %}
+                        <div class="col-sm-1 text-center">
+                            {{ field }}
+                        </div>
+                    {% else %}
+                        <div class="col-sm-1">
+                            {{ field }}
+                        </div>
+                    {% endif %}
+
+                {% endfor %}
             </div>
         {% endfor %}
-        <input type="submit" value="Submit">
+
+        <div class="row">
+           <div class="col-sm-12 text-right">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+           </div>
+        </div>
     </form>
-</div>
+<!--</div>-->
 {% endblock %}
 
 {% block styles %}
-{{ form.media }}
+<!--<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />-->
+<!--<link rel="stylesheet" href="/static/admin/css/widgets.css">-->
+<!--<script type="text/javascript" src="/admin/jsi18n/"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/core.js"></script>-->
+
+<!--<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/actions.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/urlify.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>-->
+<!--<script type="text/javascript" src="/static/admin/js/inlines.js"></script>-->
+<!--{{ form.media }}-->
 {%endblock %}

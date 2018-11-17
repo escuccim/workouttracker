@@ -9,7 +9,7 @@ class BootstrapModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(BootstrapModelForm, self).__init__(*args, **kwargs)
         for field in iter(self.fields):
-            if field is not 'start':
+            if field is not 'start' and field is not 'time':
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control'
                 })
@@ -30,19 +30,22 @@ class WorkoutDetailForm(ModelForm):
         model = WorkoutDetail
         fields = ['exercise', 'reps', 'sets', 'weight', 'intensity', 'duration']
         widgets = {
-            'exercise': forms.Select(attrs={'style': 'width: 70px'}),
-            'intensity': forms.Select(attrs={'style': 'width: 50px'}),
+            'exercise': forms.Select(attrs={'style': 'width: 100%'}),
+            'intensity': forms.Select(attrs={'style': 'width: 100%;'}),
             'reps': forms.TextInput(attrs={'size': 3}),
             'sets': forms.TextInput(attrs={'size': 3}),
             'weight': forms.TextInput(attrs={'size': 4}),
-            'duration': forms.TextInput(attrs={'size': 4}),
+            'duration': forms.TextInput(attrs={'style': 'width: 100%;'}),
         }
-class WorkoutSummaryForm(ModelForm):
-    start = forms.DateTimeField(initial=datetime.now().date(), widget=AdminDateWidget())
+class WorkoutSummaryForm(BootstrapModelForm):
+    start = forms.DateTimeField(widget=AdminDateWidget())
     time = forms.TimeField(initial=datetime.now().time(), widget=AdminTimeWidget())
 
     class Meta:
         model = WorkoutSummary
-        fields = ['start', 'time', 'duration', 'calories', 'group', 'intensity', 'avg_heartrate', 'notes']
+        fields = ['start', 'time',  'group', 'duration', 'intensity', 'calories', 'avg_heartrate', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 2})
+        }
 
 ExerciseFormSet = forms.inlineformset_factory(WorkoutSummary, WorkoutDetail, form=WorkoutDetailForm, extra=4, can_delete=True)
