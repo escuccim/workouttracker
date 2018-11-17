@@ -30,6 +30,8 @@ class WorkoutDetailForm(ModelForm):
         model = WorkoutDetail
         fields = ['exercise', 'reps', 'sets', 'weight', 'intensity', 'duration']
         widgets = {
+            'exercise': forms.Select(attrs={'style': 'width: 70px'}),
+            'intensity': forms.Select(attrs={'style': 'width: 50px'}),
             'reps': forms.TextInput(attrs={'size': 3}),
             'sets': forms.TextInput(attrs={'size': 3}),
             'weight': forms.TextInput(attrs={'size': 4}),

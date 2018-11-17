@@ -23,6 +23,18 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(document).on("click", ".edit-workout", function(e){
+    e.preventDefault();
+    id = $(this).data("val");
+
+    // get the form to show in the modal
+    url = "edit_workout/" + id;
+    html = get_chart_data(url)
+    $("#ModalLabel").html("Edit Workout");
+    $("#ModalBody").html(html);
+    $("#Modal").modal("show");
+});
+
 // the date filter buttons
 $(".date-filter-button").on("click", function(e){
     e.preventDefault();
@@ -62,10 +74,10 @@ $(document).on("click", ".expand_detail", function(e){
     // get the current content of the controller which indicates if it's open or closed
     current_html = $(this).html();
     // set them all to closed
-    $(".expand_detail").html("+");
+    $(".expand_detail").html('<i class="fas fa-plus"></i>');
     // if this was closed set it to open
-    if(current_html == "+"){
-        $(this).html("-");
+    if(current_html == '<i class="fas fa-plus"></i>'){
+        $(this).html('<i class="fas fa-minus"></i>');
         data = get_chart_data(url);
         display_exercise_detail(id, data);
     }
@@ -417,8 +429,9 @@ function update_details(start_date, end_date){
     // create our new HTML
     for(var i=0; i<data.dates.length; i++){
         html += '<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#'+data.dates[i] + '"><div class="row"><div class="col-sm-2">' + data.dates[i] + '</div><div class="col-sm-2">';
-        html += data.summaries.minutes[i] + ' mins </div><div class="col-md-2">';
-        html += data.summaries.calories[i] + ' kCal </div></div></a></h4></div>';
+        html += data.summaries.minutes[i] + ' mins </div><div class="col-sm-2">';
+        html += data.summaries.calories[i] + ' kCal </div></div></a></h4>';
+        html += '</div>';
 
         html += '<div id="'+data.dates[i] + '" class="panel-collapse collapse"><div class="panel-body"><div class="row"><div class="col-sm-9 col-sm-offset-1">';
 
@@ -427,7 +440,9 @@ function update_details(start_date, end_date){
             html += '<div class="col-sm-1">' + data.workouts[data.dates[i]][j]['time'] + '</div>';
             html += '<div class="col-sm-2">' + data.workouts[data.dates[i]][j].group + '</div><div class="col-sm-2">'  +data.workouts[data.dates[i]][j].minutes + ' mins</div>';
             html += '<div class="col-sm-2">' +  data.workouts[data.dates[i]][j].calories + ' kCal</div>';
-            html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail">+</a></div></div>';
+            html += '<div class="col-sm-1"><a class="edit-workout" data-val="' + data.workouts[data.dates[i]][j].id + '"><i class="fas fa-edit"></i></a></div>';
+            html += '<div class="col-sm-1"><i class="fas fa-trash-alt"></i></div>';
+            html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail"><div class="col-sm-1"><i class="fas fa-plus"></i></div></a></div></div>';
             html += '<div class="row exercise_detail" style="display: none;" id="detail_' + data.workouts[data.dates[i]][j].id + '"></div>';
         }
 

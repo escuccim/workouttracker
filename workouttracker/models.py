@@ -169,6 +169,15 @@ class MuscleGroup(models.Model):
     class Meta:
         ordering = ['name']
 
+class ExerciseType(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
 class Exercise(models.Model):
     name = models.CharField(max_length=100)
     main_group = models.ForeignKey(MuscleGroup, on_delete=models.CASCADE, related_name="main_group", blank=True, null=True)
@@ -176,6 +185,7 @@ class Exercise(models.Model):
     low_mets = models.FloatField(default=3)
     med_mets = models.FloatField(default=5)
     high_mets = models.FloatField(default=7)
+    type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
         return self.name
