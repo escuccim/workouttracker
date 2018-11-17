@@ -36,11 +36,11 @@ class WorkoutDetailForm(ModelForm):
             'duration': forms.TextInput(attrs={'size': 4}),
         }
 class WorkoutSummaryForm(ModelForm):
-    start = forms.DateTimeField(initial=datetime.now(), widget=AdminDateWidget())
-    time = forms.DateTimeField(initial=datetime.now(), widget=AdminTimeWidget())
+    start = forms.DateTimeField(initial=datetime.now().date(), widget=AdminDateWidget())
+    time = forms.TimeField(initial=datetime.now().time(), widget=AdminTimeWidget())
 
     class Meta:
         model = WorkoutSummary
         fields = ['start', 'time', 'duration', 'calories', 'group', 'intensity', 'avg_heartrate', 'notes']
 
-ExerciseFormSet = forms.inlineformset_factory(WorkoutSummary, WorkoutDetail,form=WorkoutDetailForm, extra=2,can_delete=True)
+ExerciseFormSet = forms.inlineformset_factory(WorkoutSummary, WorkoutDetail, form=WorkoutDetailForm, extra=4, can_delete=True)

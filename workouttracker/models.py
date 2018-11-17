@@ -221,7 +221,7 @@ class WorkoutDetail(models.Model):
 
 # Create your models here.
 class WorkoutSummary(models.Model):
-    start = models.DateTimeField()
+    start = models.DateTimeField(default=datetime.datetime.now())
     duration = models.IntegerField(default=0)
     group = models.ForeignKey(MuscleGroup, on_delete=models.DO_NOTHING)
     calories = models.IntegerField(default=0)

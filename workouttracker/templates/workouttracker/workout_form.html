@@ -5,7 +5,11 @@
 
 {% block body %}
 <div class="container">
-    <form action="{% url 'workout:edit_workout_form' workout.id %}" method="post">
+    {% if workout.id %}
+        <form action="{% url 'workout:edit_workout_form' workout.id %}" method="post">
+    {% else %}
+        <form action="{% url 'workout:add_workout_form' %}" method="post">
+    {% endif %}
         {% csrf_token %}
         {% for field in form %}
             <div class="row" style="padding: 5px;">
@@ -22,6 +26,7 @@
                 Exercises
             </div>
         </div>
+        {{ exercise_form.management_form }}
         {% for field in exercise_form %}
             <div class="row" style="padding: 5px;">
                 <div class="col-sm-12">

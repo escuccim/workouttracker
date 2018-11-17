@@ -22,6 +22,7 @@ app_name = "workout"
 urlpatterns = [
     url(r'^$', views.Index, name="index"),
     url(r'^edit_workout/(?P<pk>\d+)', views.EditWorkoutSummary, name="edit_workout_form"),
+    url(r'^add_workout/', views.AddWorkoutSummary, name="add_workout_form"),
     url(r'^api/chart_data', views.ChartData, name="chart_data"),
     url(r'^api/breakdown', views.ExerciseBreakdown, name="chart_breakdown"),
     url(r'^api/details', views.WorkoutDetails, name="workout_details"),
