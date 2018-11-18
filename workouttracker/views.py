@@ -231,17 +231,18 @@ def AddWorkoutSummary(request):
             time = form.cleaned_data['time']
 
             # save the summary
-            summary = form.save(commit=False)
-            summary.start = datetime.datetime.combine(date, time)
-            summary.user_id = user.id
-            summary.save()
-            print(summary)
+            workout = form.save(commit=False)
+            workout.start = datetime.datetime.combine(date, time)
+            workout.user_id = user.id
+            workout.save()
 
             # save the details
             details = exercise_form.save(commit=False)
             for detail in details:
-                detail.workout = summary
+                detail.workout = workout
                 detail.save()
+
+            return JsonResponse({'success': True, 'id': workout.id})
         else:
             return JsonResponse(form.errors)
     else:

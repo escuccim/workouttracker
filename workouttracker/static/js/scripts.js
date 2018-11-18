@@ -23,6 +23,14 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(".add_workout").on("click", function(e){
+    e.preventDefault();
+    html = get_add_form();
+    $("#ModalLabel").html("Add Workout");
+    $("#ModalBody").html(html);
+    $("#Modal").modal("show");
+});
+
 $(document).on("click", "#confirm-yes", function(e){
     e.preventDefault();
     $(".modal").modal("hide");
@@ -38,7 +46,7 @@ $(document).on("click", "#close_form", function(e){
 
     // ask the user to save the form first?
     saved = $("#saved").val();
-    console.log(saved);
+
     if(saved == 0){
         $("#confirmModalText").html("Close without saving?")
         $("#confirmModal").modal("show");
@@ -53,6 +61,32 @@ $(document).on("click", "#close_form", function(e){
         $("#Modal").modal("hide");
     }
 
+});
+
+$(document).on("submit", "#add_workout_form", function(e){
+    e.preventDefault();
+    $.ajax({
+            url     : $(this).attr('action'),
+            type    : $(this).attr('method'),
+            dataType: 'json',
+            data    : $(this).serialize(),
+            success : function( data ) {
+                 if(data.success == true){
+                    id = data.id;
+                    html = get_edit_form(id);
+                    $("#ModalBody").html(html);
+                    // update the field to indicate that the form has been saved
+                    $("#saved").val(1);
+                 }
+                 // else display errors
+                 else {
+
+                 }
+            },
+            error   : function( xhr, err ) {
+                 console.log(err);
+            }
+        });
 });
 
 $(document).on("submit", "#edit_workout_form", function(e){
@@ -92,6 +126,12 @@ $(document).on("click", ".edit-workout", function(e){
 
 function get_edit_form(id){
     url = "edit_workout/" + id;
+    html = get_chart_data(url);
+    return html;
+}
+
+function get_add_form(){
+    url = "add_workout/";
     html = get_chart_data(url);
     return html;
 }
