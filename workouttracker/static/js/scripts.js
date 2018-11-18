@@ -34,6 +34,7 @@ $(document).on("submit", "#edit_workout_form", function(e){
             success : function( data ) {
                  if(data.success == true){
                     $("#Modal").modal("hide");
+                    $("#controller").trigger("submit");
                  }
             },
             error   : function( xhr, err ) {
@@ -109,7 +110,12 @@ $(document).on("click", ".expand_detail", function(e){
 
 function display_exercise_detail(id, data){
     $(".exercise_detail").hide();
-
+    if(data.length == 0){
+        html = '<div class="row" style="padding-top: 5px;"><div class="col-sm-10 col-sm-offset-1 well">No details available</div></div>';
+        $("#detail_"+id).html(html);
+        $("#detail_"+id).show();
+        return;
+    }
     // check if the exercises are cardio or strength
     if(data[0].sets == 0 && data[0].reps == 0){
         cardio = true;
@@ -156,10 +162,6 @@ function display_exercise_detail(id, data){
         html += '<tr><td><b>Totals</b></td><td class="text-right">' + total_sets + '</td><td class="text-right">' + total_reps + '</td><td class="text-right">-</td><td class="text-right">' + total_weight_moved + ' kg</td></tr>';
     }
 
-
-    if(data.length == 0){
-        html += '<div class="row"><div class="col-md-3"></div><div class="col-md-9">No details available</div></div>';
-    }
     html += '</table></div>';
     $("#detail_"+id).html(html);
     $("#detail_"+id).show();
@@ -462,7 +464,7 @@ function update_details(start_date, end_date){
             html += '<div class="col-sm-2">' +  data.workouts[data.dates[i]][j].calories + ' kCal</div>';
             html += '<div class="col-sm-1"><a class="edit-workout" data-val="' + data.workouts[data.dates[i]][j].id + '"><i class="fas fa-edit"></i></a></div>';
             html += '<div class="col-sm-1"><i class="fas fa-trash-alt"></i></div>';
-            html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail"><div class="col-sm-1"><i class="fas fa-plus"></i></div></a></div></div>';
+            html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail"><i class="fas fa-plus"></i></a></div></div>';
             html += '<div class="row exercise_detail" style="display: none;" id="detail_' + data.workouts[data.dates[i]][j].id + '"></div>';
         }
 
