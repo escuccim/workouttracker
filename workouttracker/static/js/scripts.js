@@ -67,6 +67,8 @@ $(".add_weight").on("click", function(e){
         $("#last_weight").html(data.weight);
         $("#last_weight_date").html(data.date);
     }
+    $("#weight_id").val();
+    $("#previous_weight").show();
     $("#weightModal").modal("show");
 });
 
@@ -76,8 +78,32 @@ $(document).on("click", ".delete-workout", function(e){
     date = $(this).data("date");
     $("#delete-yes").data("val", id);
     $("#delete-yes").data("date", date);
+    $("#delete-yes").data("what", "workout");
     $("#confirmDeleteModalText").html("Are you sure you want to delete this?")
     $("#confirmDeleteModal").modal("show");
+});
+
+$(document).on("click", ".delete_weight", function(e){
+    e.preventDefault();
+    id = $(this).data("val");
+    $("#delete-yes").data("val", id);
+    $("#delete-yes").data("what", "weight");
+    $("#confirmDeleteModalText").html("Are you sure you want to delete this?")
+    $("#confirmDeleteModal").modal("show");
+});
+
+$(document).on("click", ".edit_weight", function(e){
+    e.preventDefault();
+    id = $(this).data("val");
+    weight = $(this).data("weight");
+    bodyfat = $(this).data("bodyfat");
+    date = $(this).data("date");
+    $("#previous_weight").hide();
+    $("#weightModal").modal("show");
+    $("#weight").val(weight);
+    $("#bodyfat").val(bodyfat);
+    $("#date").val(date);
+    $("#weight_id").val(id);
 });
 
 $(document).on("click", "#confirm-yes", function(e){
@@ -89,9 +115,16 @@ $(document).on("click", "#delete-yes", function(e){
     e.preventDefault();
     id = $(this).data("val");
     date = $(this).data("date");
-    url = "api/delete_workout/" + id;
+    what = $(this).data("what");
+    if(what == "workout"){
+        url = "api/delete_workout/" + id;
+    } else if(what == "weight"){
+        url = "api/delete_weight/" + id;
+    }
+
     data = get_chart_data(url);
     if(data.success == true){
+        $("#controller").trigger("submit");
     } else {
         console.log("Error!");
     }
@@ -140,6 +173,7 @@ $(document).on("submit", "#weight_form", function(e){
             success : function( data ) {
                  if(data.success == true){
                     $("#weightModal").modal("hide");
+                    $("#controller").trigger("submit");
                  }
                  // else display errors
                  else {
@@ -385,22 +419,10 @@ function summary_chart(ctx, myChart, start_date, end_date){
         data: {
             labels: data.dates,
             datasets: [{
-                label: 'Calories',
-                data: data.calories,
-                label: 'kCal',
-                yAxisID: 'A',
-                backgroundColor: [
-                    'rgba(255, 19, 120, 0.1)',
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 2
-            },{
                 label: 'Minutes',
                 data: data.minutes,
                 label: 'min',
-                yAxisID: 'B',
+                yAxisID: 'A',
                 backgroundColor: [
                     'rgba(120, 99, 255, 0.1)',
                 ],
@@ -408,11 +430,23 @@ function summary_chart(ctx, myChart, start_date, end_date){
                     'rgba(132,99,255,1)',
                 ],
                 borderWidth: 2
+            },{
+                label: 'Calories',
+                data: data.calories,
+                label: 'kCal',
+                yAxisID: 'B',
+                backgroundColor: [
+                    'rgba(255, 19, 120, 0.1)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 2
             }]
         },
         options: {
             scales: {
-              yAxes: [{
+              yAxes: [ {
                 id: 'A',
                 type: 'linear',
                 position: 'left',
@@ -421,9 +455,9 @@ function summary_chart(ctx, myChart, start_date, end_date){
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Calories',
+                    labelString: 'Minutes',
                 }
-              }, {
+              },{
                 id: 'B',
                 type: 'linear',
                 position: 'right',
@@ -432,7 +466,7 @@ function summary_chart(ctx, myChart, start_date, end_date){
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Minutes',
+                    labelString: 'Calories',
                 }
               }]
             }
@@ -595,8 +629,27 @@ function weight_chart(ctx, myChart, start_date, end_date){
             }
         }
     });
+    weight_history(data);
 
     return myChart;
+}
+
+function weight_history(data){
+    html = '<div class="col-sm-6 col-sm-offset-3"><table class="table table-striped"><thead><tr><th>Date</th><th>Weight</th><th>Body Fat</th><th colspan="2"></th></tr></thead>';
+
+    for(var i = 0; i < data.dates.length; i++){
+        html += '<tr>';
+        html += '<td>' + data.dates[i] + '</td>';
+        html += '<td>' + data.weights[i] + ' ' + data.units[i] + '</td>';
+        html += '<td>' + data.bodyfats[i] + ' %</td>';
+        html += '<td><a class="edit_weight" data-date="' + data.dates[i] + '" data-weight="' + data.weights[i] + '" data-bodyfat="' + data.bodyfats[i] + '" data-val="' + data.ids[i] + '"><i class="fas fa-edit"></i></a></td>';
+        html += '<td><a class="delete_weight" data-val="' + data.ids[i] + '"><i class="fas fa-trash"></i></a></td>';
+        html += '</tr>';
+    }
+    html += '</div>';
+
+    $("#details").html(html);
+    $("#details").show();
 }
 
 function update_details(start_date, end_date){

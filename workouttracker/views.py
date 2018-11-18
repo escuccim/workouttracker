@@ -177,12 +177,14 @@ def WeightDetails(request):
     user = request.user
     weights = WeightHistory.objects.filter(user=user).filter(datetime__gte=start_date).filter(datetime__lte=end_date)
 
-    weight_dict = {'dates': [], 'weights': [], 'bodyfats': []}
+    weight_dict = {'dates': [], 'weights': [], 'bodyfats': [], 'units': [], 'ids': []}
     for weight in weights:
         date_str = date_to_string(weight.datetime)
         weight_dict['dates'].append(date_str)
         weight_dict['weights'].append(weight.weight)
         weight_dict['bodyfats'].append(weight.bodyfat)
+        weight_dict['units'].append(weight.units)
+        weight_dict['ids'].append(weight.id)
 
     return JsonResponse(weight_dict, safe=False)
 
@@ -275,11 +277,18 @@ def AddWeight(request):
     user = request.user
     bodyfat = request.POST.get("bodyfat", None)
     new_weight = request.POST.get("weight")
+    id = request.POST.get("id")
 
     if new_weight:
-        weight = WeightHistory()
-        weight.user = user
-        weight.datetime = datetime.datetime.now()
+        if id:
+            weight = WeightHistory.objects.filter(user=user).filter(pk=id).first()
+            new_date = datetime.datetime.strptime(request.POST.get("date"), '%Y-%m-%d')
+            weight.datetime = new_date
+        else:
+            weight = WeightHistory()
+            weight.datetime = datetime.datetime.now()
+            weight.user = user
+
         weight.weight = new_weight
         weight.units = "kg"
 
@@ -294,3 +303,12 @@ def AddWeight(request):
         return JsonResponse({'success': True, 'weight': model_to_dict(weight)}, safe=False)
 
     return JsonResponse({'success': False})
+
+def DeleteWeight(request, pk):
+    user = request.user
+    weight = WeightHistory.objects.filter(user=user).filter(pk=pk).first()
+    if weight:
+        weight.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
