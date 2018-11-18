@@ -185,7 +185,7 @@ class Exercise(models.Model):
     low_mets = models.FloatField(default=3)
     med_mets = models.FloatField(default=5)
     high_mets = models.FloatField(default=7)
-    type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE, default=1, null=True)
+    type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE, default=None, null=True)
 
     def __str__(self):
         return self.name
