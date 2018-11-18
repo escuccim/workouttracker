@@ -23,6 +23,35 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$("#add_weight").on("click", function(e){
+    e.preventDefault();
+    console.log("Save!");
+    weight_val = $("#weight").val();
+    body_fat_val = $("#bodyfat").val();
+    errors = false;
+    if(weight_val == "" || isNaN(weight_val)){
+        $("#weight_error").show();
+        errors = true;
+    } else {
+        $("#weight_error").hide();
+    }
+    if(body_fat_val != ""){
+        if(isNaN(body_fat_val)){
+            $("#bodyfat_error").show();
+            errors = true;
+        } else {
+            $("#bodyfat_error").hide();
+        }
+    } else {
+        $("#bodyfat_error").hide();
+    }
+
+    // if there were no errors submit the form
+    if(!errors){
+        $("#weight_form").trigger("submit");
+    }
+});
+
 $(".add_workout").on("click", function(e){
     e.preventDefault();
     html = get_add_form();
@@ -31,9 +60,46 @@ $(".add_workout").on("click", function(e){
     $("#Modal").modal("show");
 });
 
+$(".add_weight").on("click", function(e){
+    e.preventDefault();
+    data = get_chart_data("api/get_weight");
+    if(data.weight){
+        $("#last_weight").html(data.weight);
+        $("#last_weight_date").html(data.date);
+    }
+    $("#weightModal").modal("show");
+});
+
+$(document).on("click", ".delete-workout", function(e){
+    e.preventDefault();
+    id = $(this).data("val");
+    date = $(this).data("date");
+    $("#delete-yes").data("val", id);
+    $("#delete-yes").data("date", date);
+    $("#confirmDeleteModalText").html("Are you sure you want to delete this?")
+    $("#confirmDeleteModal").modal("show");
+});
+
 $(document).on("click", "#confirm-yes", function(e){
     e.preventDefault();
     $(".modal").modal("hide");
+});
+
+$(document).on("click", "#delete-yes", function(e){
+    e.preventDefault();
+    id = $(this).data("val");
+    date = $(this).data("date");
+    url = "api/delete_workout/" + id;
+    data = get_chart_data(url);
+    if(data.success == true){
+    } else {
+        console.log("Error!");
+    }
+});
+
+$(document).on("click", "#delete-no", function(e){
+    e.preventDefault();
+    $("#confirmDeleteModal").modal("hide");
 });
 
 $(document).on("click", "#confirm-no", function(e){
@@ -63,6 +129,29 @@ $(document).on("click", "#close_form", function(e){
 
 });
 
+$(document).on("submit", "#weight_form", function(e){
+    e.preventDefault();
+    console.log("submit!")
+    $.ajax({
+            url     : $(this).attr('action'),
+            type    : $(this).attr('method'),
+            dataType: 'json',
+            data    : $(this).serialize(),
+            success : function( data ) {
+                 if(data.success == true){
+                    $("#weightModal").modal("hide");
+                 }
+                 // else display errors
+                 else {
+                    // form validation should cover the errors, but we may need to address them here in the future?
+                 }
+            },
+            error   : function( xhr, err ) {
+                 console.log(err);
+            }
+        });
+});
+
 $(document).on("submit", "#add_workout_form", function(e){
     e.preventDefault();
     $.ajax({
@@ -80,7 +169,7 @@ $(document).on("submit", "#add_workout_form", function(e){
                  }
                  // else display errors
                  else {
-
+                    // form validation should cover the errors, but we may need to address them here in the future?
                  }
             },
             error   : function( xhr, err ) {
@@ -432,6 +521,8 @@ function weight_chart(ctx, myChart, start_date, end_date){
     } catch(err) {
         console.log(err);
     }
+    data = get_chart_data(url);
+
     datasets = [{
                 label: 'Weight',
                 data: data.weights,
@@ -543,7 +634,7 @@ function update_details(start_date, end_date){
             html += '<div class="col-sm-2">' + data.workouts[data.dates[i]][j].group + '</div><div class="col-sm-2">'  +data.workouts[data.dates[i]][j].minutes + ' mins</div>';
             html += '<div class="col-sm-2">' +  data.workouts[data.dates[i]][j].calories + ' kCal</div>';
             html += '<div class="col-sm-1"><a class="edit-workout" data-val="' + data.workouts[data.dates[i]][j].id + '"><i class="fas fa-edit"></i></a></div>';
-            html += '<div class="col-sm-1"><i class="fas fa-trash-alt"></i></div>';
+            html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" data-date="' + data.dates[i] + '" class="delete-workout"><i class="fas fa-trash-alt"></i></a></div>';
             html += '<div class="col-sm-1"><a data-val="' + data.workouts[data.dates[i]][j].id + '" id="expand_control'+data.workouts[data.dates[i]][j].id+'" class="expand_detail"><i class="fas fa-plus"></i></a></div></div>';
             html += '<div class="row exercise_detail" style="display: none;" id="detail_' + data.workouts[data.dates[i]][j].id + '"></div>';
         }

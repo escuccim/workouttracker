@@ -41,8 +41,11 @@
                             <button type="submit" class="btn btn-action btn-sm">Update</button>
                         </div>
 
-                        <div class="col-sm-1">
+                        <div class="col-sm-2">
                             <a class="add_workout" title="Add workout"><i class="fas fa-plus-circle big"></i></a>
+                            <a class="add_weight" title="Add weight"><i class="fas fa-weight big"></i></a>
+
+
                         </div>
                     </div>
                     <div class="row" style="padding: 5px;">
@@ -70,32 +73,85 @@
 
 <div class="modal fade modal-lg" id="Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="ModalLabel">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="ModalBody">
-      </div>
-      <div class="modal-footer" id="ModalFooter">
-      </div>
+        <div class="modal-header">
+            <h5 class="modal-title" id="ModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body" id="ModalBody">
+        </div>
+        <div class="modal-footer" id="ModalFooter">
+        </div>
     </div>
 </div>
 
 <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true" id="confirmModal">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="confirmModalText"></h4>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" id="confirm-yes">Yes</button>
-        <button type="button" class="btn btn-primary" id="confirm-no">No</button>
-      </div>
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="confirmModalText"></h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="confirm-yes">Yes</button>
+                <button type="button" class="btn btn-primary" id="confirm-no">No</button>
+            </div>
+        </div>
     </div>
-  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true" id="confirmDeleteModal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="confirmDeleteModalText"></h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="delete-yes" data-val="" data-date="">Yes</button>
+                <button type="button" class="btn btn-primary" id="delete-no">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true" id="weightModal">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="weightHeader">Enter your weight:</h3>
+            </div>
+            <form class="form form-horizontal" id="weight_form" action="{% url 'workout:add_weight'%}" method="post">
+                {% csrf_token %}
+                <div class="modal-body" id="WeightModalBody">
+                    <p>Your last recorded weight was <span id="last_weight"></span> on <span id="last_weight_date"></span>.</p>
+
+                    <div class="row" style="padding-top: 5px;">
+                        <label for="weight" class="col-sm-1">Weight:</label>
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control" required="true" name="weight" id="weight" style="width: 90%; display: inline;"> kg
+                            <div class="error text-danger" style="display: none;" id="weight_error">
+                                <p>Please enter a valid weight!</p>
+                            </div>
+                        </div>
+                        <label for="bodyfat" class="col-sm-2">Body Fat:</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" name="bodyfat" id="bodyfat" style="width: 85%; display: inline;"> %
+                            <div class="error text-danger" style="display: none;" id="bodyfat_error">
+                                <p>Please enter a valid body fat!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="close_weight" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="add_weight">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

@@ -170,7 +170,9 @@ def ExerciseDetails(request, id):
 
 def WeightDetails(request):
     start_date, end_date = get_dates_from_request(request, offset=30)
-    print(start_date)
+
+    # add one day to the end_date since it is exclusive
+    end_date = (end_date + datetime.timedelta(days=1))
 
     user = request.user
     weights = WeightHistory.objects.filter(user=user).filter(datetime__gte=start_date).filter(datetime__lte=end_date)
@@ -251,3 +253,44 @@ def AddWorkoutSummary(request):
 
 
     return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})
+
+def DeleteWorkout(request, pk):
+    user = request.user
+    workout = WorkoutSummary.objects.filter(user=user).filter(pk=pk).first()
+    workout.delete()
+
+    return JsonResponse({'success': True})
+
+def GetWeight(request):
+    user = request.user
+    weight = user.weighthistory_set.order_by('datetime').last()
+
+    date = date_to_string(weight.datetime)
+    weight = model_to_dict(weight)
+    weight['date'] = date
+
+    return JsonResponse(weight, safe=False)
+
+def AddWeight(request):
+    user = request.user
+    bodyfat = request.POST.get("bodyfat", None)
+    new_weight = request.POST.get("weight")
+
+    if new_weight:
+        weight = WeightHistory()
+        weight.user = user
+        weight.datetime = datetime.datetime.now()
+        weight.weight = new_weight
+        weight.units = "kg"
+
+        if bodyfat:
+            weight.bodyfat = bodyfat
+        # we may want to use the previous body fat here to keep the chart looking nice
+        else:
+            pass
+
+        weight.save()
+
+        return JsonResponse({'success': True, 'weight': model_to_dict(weight)}, safe=False)
+
+    return JsonResponse({'success': False})
