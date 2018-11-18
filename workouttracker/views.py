@@ -189,24 +189,25 @@ def EditWorkoutSummary(request, pk):
     workout = WorkoutSummary.objects.filter(user=request.user).get(id=pk)
 
     if request.method == 'POST':
-        form = WorkoutSummaryForm(request.POST, prefix="summary")
+        print(request.POST)
+        form = WorkoutSummaryForm(request.POST, prefix="summary", instance=workout)
         exercise_form = ExerciseFormSet(request.POST, prefix="detail", instance=workout)
-        print(request.POST['summary-start'])
+
         if form.is_valid() and exercise_form.is_valid():
             # combine the date and time into one field
             date = form.cleaned_data["start"]
             time = form.cleaned_data['time']
 
             # save the summary
-            summary = form.save(commit=False)
-            summary.start = datetime.datetime.combine(date, time)
-            summary.user_id = user.id
-            summary.save()
+            workout = form.save(commit=False)
+            workout.start = datetime.datetime.combine(date, time)
+            workout.user_id = user.id
+            workout.save()
 
             # save the details
             exercise_form.save()
 
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'id': workout.id })
         else:
             return JsonResponse(form.errors)
     else:
@@ -214,7 +215,7 @@ def EditWorkoutSummary(request, pk):
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
 
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start)})
 
 def AddWorkoutSummary(request):
     user = request.user

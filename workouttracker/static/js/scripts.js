@@ -23,9 +23,40 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(document).on("click", "#confirm-yes", function(e){
+    e.preventDefault();
+    $(".modal").modal("hide");
+});
+
+$(document).on("click", "#confirm-no", function(e){
+    e.preventDefault();
+    $("#confirmModal").modal("hide");
+});
+
+$(document).on("click", "#close_form", function(e){
+    e.preventDefault();
+
+    // ask the user to save the form first?
+    saved = $("#saved").val();
+    console.log(saved);
+    if(saved == 0){
+        $("#confirmModalText").html("Close without saving?")
+        $("#confirmModal").modal("show");
+    }
+    else {
+        // refresh the page
+        $("#controller").trigger("submit");
+
+        // expand the proper day?
+        date = $(this).data("val");
+        $("#"+date).removeClass("collapse");
+        $("#Modal").modal("hide");
+    }
+
+});
+
 $(document).on("submit", "#edit_workout_form", function(e){
     e.preventDefault();
-    console.log("submit!");
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -33,8 +64,15 @@ $(document).on("submit", "#edit_workout_form", function(e){
             data    : $(this).serialize(),
             success : function( data ) {
                  if(data.success == true){
-                    $("#Modal").modal("hide");
-                    $("#controller").trigger("submit");
+                    id = data.id;
+                    html = get_edit_form(id);
+                    $("#ModalBody").html(html);
+                    // update the field to indicate that the form has been saved
+                    $("#saved").val(1);
+                 }
+                 // else display errors
+                 else {
+
                  }
             },
             error   : function( xhr, err ) {
@@ -46,15 +84,17 @@ $(document).on("submit", "#edit_workout_form", function(e){
 $(document).on("click", ".edit-workout", function(e){
     e.preventDefault();
     id = $(this).data("val");
-
-    // get the form to show in the modal
-    url = "edit_workout/" + id;
-    html = get_chart_data(url);
-//    $('body').trigger("load");
+    html = get_edit_form(id);
     $("#ModalLabel").html("Edit Workout");
     $("#ModalBody").html(html);
     $("#Modal").modal("show");
 });
+
+function get_edit_form(id){
+    url = "edit_workout/" + id;
+    html = get_chart_data(url);
+    return html;
+}
 
 // the date filter buttons
 $(".date-filter-button").on("click", function(e){
