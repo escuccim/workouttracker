@@ -528,8 +528,8 @@ function strength_chart(ctx, myChart, start_date, end_date){
         use_group = false;
 
         // check that the data has some values in it
-        for(var i = 0; i < data.workouts[group]['total_weight'].length; i++){
-            if(data.workouts[group]['total_weight'][i] > 0){
+        for(var i = 0; i < data.workouts[group]['avg_weight'].length; i++){
+            if(data.workouts[group]['avg_weight'][i] > 0){
                 use_group = true;
                 break;
             }
@@ -563,14 +563,29 @@ function strength_chart(ctx, myChart, start_date, end_date){
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Total Weight (kg)',
+                    labelString: 'Average Weight (kg)',
                 }
               }]
             }
         }
     });
 
+    strength_detail(data);
+
     return myChart;
+}
+
+function strength_detail(data){
+    html = '<div class="col-sm-12"><table class="table table-striped"><thead><tr><th>Date</th><th>Group</th><th>Sets</th><th>Reps</th><th>Total Weight</th><th>Max Weight</th><th>Avg Weight</th></tr></thead>';
+
+    for(var i=0; i<data.dates.length; i++){
+        html += '<tr><td>' + data.dates[i] + '</td></tr>';
+    }
+
+    html += '</table></div>';
+
+    $("#details").html(html);
+    $("#details").show();
 }
 
 function breakdown_chart(ctx, myChart, start_date, end_date){
