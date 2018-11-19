@@ -4,7 +4,29 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+import numpy as np
+import copy
 import datetime
+
+def calories_burned_walking(summary):
+    user = UserProfile.objects.filter(user_id=summary.user_id).first()
+    weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
+
+    # height and weight are required to use this method
+    if user.height and weight:
+        # calculate the total distance
+        distance = 0
+        for exercise in summary.workoutdetail_set.all():
+            distance += exercise.distance
+
+        kmh = distance / summary.duration
+        mps = kmh / 3.6
+
+        calories_burned = (0.035 * weight.weight) + ((mps ** 2) / user.height) * (0.029) * (weight.weight)
+    else:
+        calories_burned = calories_by_mets(summary)
+
+    return calories_burned
 
 def calories_burned_strength(summary):
     # get maximum heart rate
@@ -108,10 +130,14 @@ def calories_by_mets(summary):
 
     # else we will use a different method
     else:
-        if summary.group_id == 20:
+        if summary.type_id == 2:
+            calories_burned = calories_burned_strength(summary)
+        elif summary.type_id == 5:
+            calories_burned = calories_burned_walking(summary)
+        elif summary.type_id == 1:
             calories_burned = calories_burned_cardio(summary)
         else:
-            calories_burned = calories_burned_strength(summary)
+            calories_burned = calories_burned_cardio(summary)
 
     return calories_burned
 
@@ -171,12 +197,13 @@ class MuscleGroup(models.Model):
 
 class ExerciseType(models.Model):
     name = models.CharField(max_length=50)
+    order = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ['order']
 
 class Exercise(models.Model):
     name = models.CharField(max_length=100)
@@ -233,6 +260,7 @@ class WorkoutDetail(models.Model):
 class WorkoutSummary(models.Model):
     start = models.DateTimeField(default=datetime.datetime.now())
     duration = models.IntegerField(default=0)
+    type = models.ForeignKey(ExerciseType, on_delete=models.DO_NOTHING)
     group = models.ForeignKey(MuscleGroup, on_delete=models.DO_NOTHING)
     calories = models.IntegerField(default=0)
     user = models.ForeignKey(User)
@@ -245,11 +273,79 @@ class WorkoutSummary(models.Model):
         # calculate the calories burned during this exercise sesssion
         self.calculated_calories = calories_by_mets(self)
 
-        if self.calories == 0:
+        if True:#self.calories == 0:
             self.calories = self.calculated_calories
 
         # save the relationship as normal
         super(WorkoutSummary, self).save(*args, **kwargs)
+
+    @staticmethod
+    def strength_training_history(user,  end_date=None, start_date=None):
+        if start_date is None:
+            start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+        if end_date is None:
+            end_date = datetime.datetime.now().date()
+
+        end_date = (end_date + datetime.timedelta(days=1))
+
+        workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date).order_by("start")
+        workout_dict = {}
+        groups = {}
+        dates = []
+        blanks = []
+
+        # create our list of dates
+        for workout in workouts:
+            exercises = workout.workoutdetail_set.all()
+            date = str(workout.start.year) + "-" + str(workout.start.month).zfill(2) + "-" + str(workout.start.day).zfill(2)
+
+            if date not in dates:
+                dates.append(date)
+                blanks.append(None)
+
+        for workout in workouts:
+            group = workout.group.name
+
+            if group not in workout_dict:
+                workout_dict[group] = {'avg_weight': copy.copy(blanks), 'max_weight': copy.copy(blanks), 'total_weight': copy.copy(blanks),'total_reps': copy.copy(blanks), 'total_sets': copy.copy(blanks)}
+                groups[group] = workout.group.color
+
+        print("Blanks:", blanks)
+        print("DIct:", workout_dict)
+
+        for workout in workouts:
+            exercises = workout.workoutdetail_set.all()
+            date = str(workout.start.year) + "-" + str(workout.start.month).zfill(2) + "-" + str(workout.start.day).zfill(2)
+
+            group = workout.group.name
+
+            total_weight = 0
+            total_sets = 0
+            total_reps = 0
+            weights = []
+
+            for exercise in exercises:
+                weights.append(exercise.weight)
+                total_weight += (exercise.reps * exercise.sets * exercise.weight)
+                total_sets += exercise.sets
+                total_reps += exercise.sets * exercise.reps
+
+            idx = dates.index(date)
+
+            if len(weights):
+                workout_dict[group]['max_weight'][idx] = np.max(weights)
+                workout_dict[group]['avg_weight'][idx] = np.mean(weights)
+
+            workout_dict[group]['total_weight'][idx] = total_weight
+            workout_dict[group]['total_sets'][idx] = total_sets
+            workout_dict[group]['total_reps'][idx] = total_reps
+
+
+            print("TOtal Weight:", total_weight)
+            print("Total Reps:", total_reps)
+            print(workout_dict[group]['total_weight'])
+
+        return workout_dict, groups, dates
 
     @staticmethod
     def workouts_by_day(user, end_date=None, start_date=None):

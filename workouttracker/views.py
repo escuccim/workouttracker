@@ -188,6 +188,18 @@ def WeightDetails(request):
 
     return JsonResponse(weight_dict, safe=False)
 
+def StrengthData(request):
+    start_date, end_date = get_dates_from_request(request, offset=30)
+
+    # add one day to the end_date since it is exclusive
+    end_date = (end_date + datetime.timedelta(days=1))
+
+    # get the breakdown
+    user = request.user
+    workouts, groups, dates = WorkoutSummary.strength_training_history(user=user, start_date=start_date, end_date=end_date)
+
+    return JsonResponse({'groups': groups, 'workouts': workouts, 'dates': dates}, safe=False)
+
 def EditWorkoutSummary(request, pk):
     user = request.user
     workout = WorkoutSummary.objects.filter(user=request.user).get(id=pk)

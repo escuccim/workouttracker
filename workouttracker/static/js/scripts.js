@@ -14,12 +14,15 @@ $("#controller").on("submit", function(e){
         summary_chart(ctx, myChart, start_date, end_date);
     } else if(chart == "breakdown"){
         breakdown_chart(ctx, myChart, start_date, end_date);
+        display_summary(start_date, end_date);
     } else if(chart == "details"){
         update_details(start_date, end_date);
     } else if(chart == "totals"){
         display_summary(start_date, end_date);
     } else if(chart == "weight"){
         weight_chart(ctx, myChart, start_date, end_date);
+    } else if(chart == "strength"){
+        strength_chart(ctx, myChart, start_date, end_date);
     }
 });
 
@@ -70,6 +73,25 @@ $(".add_weight").on("click", function(e){
     $("#weight_id").val();
     $("#previous_weight").show();
     $("#weightModal").modal("show");
+});
+
+// change the add/edit form according to the type of workout selected
+$(document).on("change", "#id_summary-type", function(e){
+    val = $(this).val();
+    $(".exercise_detail_form").show();
+    if(val == 2){
+        $(".strength_field").show();
+        $(".walk_field").hide();
+    } else if (val == 5){
+        $(".strength_field").hide();
+        $(".walk_field").show();
+    } else if (val == 1 || val == 3){
+        $(".strength_field").hide();
+        $(".walk_field").hide();
+    } else {
+        $(".strength_field").hide();
+        $(".walk_field").hide();
+    }
 });
 
 $(document).on("click", ".delete-workout", function(e){
@@ -385,11 +407,13 @@ function get_chart_data(url){
         async: false,
         url: url,
         type: 'get',
+        dataType: 'json',
         success: function(result){
             data = result;
         },
-        error: function(){
+        error: function(err){
             console.log("Error!");
+            console.log(err);
         }
         });
     return data;
@@ -467,6 +491,79 @@ function summary_chart(ctx, myChart, start_date, end_date){
                 scaleLabel: {
                     display: true,
                     labelString: 'Calories',
+                }
+              }]
+            }
+        }
+    });
+
+    return myChart;
+}
+
+function convertHexToRGB(hex, alpha)
+{
+    var red = hex.substr(1, 2), green = hex.substr(3, 2), blue = hex.substr(5, 2), alpha = alpha;
+    color = "rgba(" + parseInt(red, 16) + "," + parseInt(green, 16) + "," + parseInt(blue, 16) + "," + alpha + ")";
+    return color;
+}
+
+function strength_chart(ctx, myChart, start_date, end_date){
+    url = "api/strength_data?foo=bar";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+
+    try {
+        ctx = clearChart();
+    } catch(err) {
+        console.log(err);
+    }
+    console.log(data);
+    datasets = []
+    for(group in data.groups){
+        use_group = false;
+
+        // check that the data has some values in it
+        for(var i = 0; i < data.workouts[group]['total_weight'].length; i++){
+            if(data.workouts[group]['total_weight'][i] > 0){
+                use_group = true;
+                break;
+            }
+        }
+        if(use_group){
+            datasets.push({
+                label: group,
+                data: data.workouts[group].total_weight,
+                borderWidth: 1,
+                backgroundColor: convertHexToRGB(data.groups[group], 0.3),
+                borderColor: data.groups[group],
+            });
+        }
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: datasets,
+        },
+        options: {
+            spanGaps: true,
+            scales: {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Total Weight (kg)',
                 }
               }]
             }
@@ -701,7 +798,7 @@ function update_details(start_date, end_date){
 }
 
 function display_summary(start_date, end_date){
-    $("#charts").hide();
+//    $("#charts").hide();
     $("#details").show();
 
     url = "api/breakdown?foo";

@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title" id="weightHeader">Enter your weight:</h3>
+                <h4 class="modal-title" id="weightHeader">Enter your weight:</h4>
             </div>
             <form class="form form-horizontal" id="weight_form" action="{% url 'workout:add_weight'%}" method="post">
                 {% csrf_token %}

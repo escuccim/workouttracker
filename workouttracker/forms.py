@@ -9,12 +9,9 @@ class BootstrapModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(BootstrapModelForm, self).__init__(*args, **kwargs)
         for field in iter(self.fields):
-            if field is not 'start' and field is not 'time':
-                self.fields[field].widget.attrs.update({
-                    'class': 'form-control'
-                })
-            else:
-                pass
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control'
+            })
 
 class MuscleGroupForm(ModelForm):
     class Meta:
@@ -28,23 +25,25 @@ class WorkoutDetailForm(ModelForm):
 
     class Meta:
         model = WorkoutDetail
-        fields = ['exercise', 'reps', 'sets', 'weight', 'intensity', 'duration']
+        fields = ['exercise', 'sets', 'reps', 'weight', 'intensity', 'duration', 'distance']
         widgets = {
-            'exercise': forms.Select(attrs={'style': 'width: 100%'}),
-            'intensity': forms.Select(attrs={'style': 'width: 100%;'}),
-            'reps': forms.TextInput(attrs={'size': 3}),
-            'sets': forms.TextInput(attrs={'size': 3}),
-            'weight': forms.TextInput(attrs={'size': 4}),
-            'duration': forms.TextInput(attrs={'style': 'width: 100%;'}),
+            'exercise': forms.Select(attrs={'style': 'width: 100%', 'class': 'form-control'}),
+            'intensity': forms.Select(attrs={'style': 'width: 100%;', 'class': 'form-control'}),
+            'distance': forms.NumberInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
+            'reps': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
+            'sets': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
+            'weight': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
+            'duration': forms.TextInput(attrs={'style': 'width: 100%;', 'min': 0, 'class': 'form-control'}),
         }
+
 class WorkoutSummaryForm(BootstrapModelForm):
-    start = forms.DateTimeField(widget=AdminDateWidget())
-    time = forms.TimeField(initial=datetime.now().time(), widget=AdminTimeWidget())
+    time = forms.TimeField(initial=datetime.now().time(), widget=forms.TimeInput(attrs={'type': 'time'}))
 
     class Meta:
         model = WorkoutSummary
-        fields = ['start', 'time',  'group', 'duration', 'intensity', 'calories', 'avg_heartrate', 'notes']
+        fields = ['start', 'time',  'type', 'group', 'duration', 'intensity', 'calories', 'avg_heartrate', 'notes']
         widgets = {
+            'start': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 2})
         }
 

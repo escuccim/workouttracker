@@ -38,20 +38,23 @@
 
                     </div>
                     <div class="row" style="padding: 5px;">
+                        <div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-success btn-block active date-filter-button">Week</button></div>
+                        <div class="col-sm-2 text-center"><button type="button" data-val="30" id="month_button" class="btn btn-secondary btn-block date-filter-button">Month</button></div>
+                        <div class="col-sm-2 text-center"><button type="button" data-val="365" id="year_button" class="btn btn-secondary btn-block date-filter-button">Year</button></div>
+
                         <label class="control-label col-sm-1" for="chart">View:</label>
                         <div class="col-sm-3">
                             <select class="form-control" id="chart" name="chart">
                                 <option value="summary">Summary Chart</option>
-                                <option value="breakdown">Breakdown Chart</option>
-                                <option value="totals">Workout Summary</option>
+                                <option value="breakdown">Breakdown by Group</option>
+                                <!--<option value="totals">Workout Summary</option>-->
                                 <option value="details">Workout Details</option>
+                                <option value="strength">Weight Moved</option>
                                 <option value="weight">Weight History</option>
                             </select>
                         </div>
 
-                        <div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-success btn-block active date-filter-button">Week</button></div>
-                        <div class="col-sm-2 text-center"><button type="button" data-val="30" id="month_button" class="btn btn-secondary btn-block date-filter-button">Month</button></div>
-                        <div class="col-sm-2 text-center"><button type="button" data-val="365" id="year_button" class="btn btn-secondary btn-block date-filter-button">Year</button></div>
+
                     </div>
                 </div>
             </form>
@@ -64,7 +67,9 @@
             </div>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-sm-12"><hr></div>
+    </div>
     <div class="row" id="details" style="display: none;">
     </div>
 </div>

@@ -13,19 +13,19 @@
         <div class="row" style="padding: 5px;">
             {% for field in form %}
                 {% if field.name != 'notes' %}
-                    <div class="col-sm-2">
+                    <div class="col-sm-2 padded">
                         {{ field.label_tag }}
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-4 padded">
                          {{ field }}
                     </div>
                 {% else %}
                     </div>
                     <div class="row" style="padding: 5px;">
-                        <div class="col-sm-2">
+                        <div class="col-sm-2 padded">
                             {{ field.label_tag }}
                         </div>
-                        <div class="col-sm-10">
+                        <div class="col-sm-10 padded">
                              {{ field }}
                         </div>
                 {% endif %}
@@ -33,59 +33,80 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                Exercises
+               <hr>
             </div>
         </div>
         {{ exercise_form.management_form }}
-        <div class="row">
-            <div class="col-sm-3">
-                <label for="exercise">Exercise:</label>
+        <div class="exercise_detail_form" style="display: none;">
+            <div class="row">
+                <div class="col-sm-3">
+                    <label for="exercise">Exercise:</label>
+                </div>
+                <div class="col-sm-1 strength_field">
+                    <label for="sets">Sets:</label>
+                </div>
+                <div class="col-sm-1 strength_field">
+                    <label for="reps">Reps:</label>
+                </div>
+                <div class="col-sm-2 strength_field">
+                    <label for="weight">Weight (kg):</label>
+                </div>
+                <div class="col-sm-2">
+                    <label for="intensity">Intensity:</label>
+                </div>
+                <div class="col-sm-2">
+                    <label for="duration">Duration:</label>
+                </div>
+                <div class="col-sm-2 walk_field">
+                    <label for="distance">Distance (km):</label>
+                </div>
+                <div class="col-sm-1">
+                    <label for="delete">Delete:</label>
+                </div>
             </div>
-            <div class="col-sm-1">
-                <label for="reps">Reps:</label>
-            </div>
-            <div class="col-sm-1">
-                <label for="sets">Sets:</label>
-            </div>
-            <div class="col-sm-1">
-                <label for="weight">Weight:</label>
-            </div>
-            <div class="col-sm-3">
-                <label for="intensity">Intensity:</label>
-            </div>
-            <div class="col-sm-2">
-                <label for="duration">Duration:</label>
-            </div>
-            <div class="col-sm-1">
-                <label for="delete">Delete:</label>
-            </div>
-        </div>
-        {% for form in exercise_form %}
-            <div class="row" style="padding: 5px;">
-                {% for field in form %}
-                    {% if field.name == "exercise" or field.name == "intensity" %}
-                        <div class="col-sm-3">
+            {% for form in exercise_form %}
+                <div class="row" style="padding: 5px;">
+                    {% for field in form %}
+                        {% if field.name == "exercise" %}
+                            <div class="col-sm-3">
+                                {{ field }}
+                            </div>
+                        {% elif field.name == "intensity" %}
+                             <div class="col-sm-2">
+                                {{ field }}
+                            </div>
+                        {% elif  field.name == "distance" %}
+                             <div class="col-sm-2 walk_field">
+                                {{ field }}
+                            </div>
+                        {% elif field.name == "duration"  %}
+                            <div class="col-sm-2">
+                                {{ field }}
+                            </div>
+                        {% elif field.name == "id" %}
                             {{ field }}
-                        </div>
-                    {% elif field.name == "duration" %}
-                        <div class="col-sm-2">
-                            {{ field }}
-                        </div>
-                    {% elif field.name == "id" %}
-                        {{ field }}
-                    {% elif field.name == "DELETE" %}
-                        <div class="col-sm-1 text-center">
-                            {{ field }}
-                        </div>
-                    {% else %}
-                        <div class="col-sm-1">
-                            {{ field }}
-                        </div>
-                    {% endif %}
+                        {% elif field.name == "DELETE" %}
+                            <div class="col-sm-1 text-center">
+                                {{ field }}
+                            </div>
+                        {% elif field.name == "reps" or field.name == "sets" %}
+                            <div class="col-sm-1 strength_field">
+                                {{ field }}
+                            </div>
+                        {% elif field.name == "weight"  %}
+                            <div class="col-sm-2 strength_field">
+                                {{ field }}
+                            </div>
+                        {% else %}
+                            <div class="col-sm-1">
+                                {{ field }}
+                            </div>
+                        {% endif %}
 
-                {% endfor %}
-            </div>
-        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
 
         <div class="row">
            <div class="col-sm-12 text-right">
