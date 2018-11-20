@@ -407,7 +407,6 @@ function get_chart_data(url){
         async: false,
         url: url,
         type: 'get',
-        dataType: 'json',
         success: function(result){
             data = result;
         },
