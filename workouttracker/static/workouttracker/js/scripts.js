@@ -9,6 +9,7 @@ $("#controller").on("submit", function(e){
 
     $("#charts").show();
     $("#details").hide();
+    $(".strength-drill-down").hide();
 
     if(chart == "summary"){
         summary_chart(ctx, myChart, start_date, end_date);
@@ -22,6 +23,7 @@ $("#controller").on("submit", function(e){
     } else if(chart == "weight"){
         weight_chart(ctx, myChart, start_date, end_date);
     } else if(chart == "strength"){
+        $(".strength-drill-down").show();
         strength_chart(ctx, myChart, start_date, end_date);
     }
 });
@@ -52,6 +54,19 @@ $("#add_weight").on("click", function(e){
     // if there were no errors submit the form
     if(!errors){
         $("#weight_form").trigger("submit");
+    }
+});
+
+$("#strength-group").on("change", function(e){
+    group = $(this).val();
+
+    if(group != ""){
+        start_date = $("#start_date").val();
+        end_date = $("#end_date").val();
+
+        strength_detail_chart(ctx, myChart, start_date, end_date, $(this).val());
+    } else {
+        strength_chart(ctx, myChart, start_date, end_date);
     }
 });
 
@@ -152,6 +167,37 @@ $(document).on("click", "#delete-yes", function(e){
     }
 });
 
+$(document).on("submit", "#profile_form", function(e){
+    e.preventDefault();
+    console.log("submit!")
+    $.ajax({
+            url     : $(this).attr('action'),
+            type    : $(this).attr('method'),
+            dataType: 'json',
+            data    : $(this).serialize(),
+            success : function( data ) {
+                 if(data.success == true){
+                    $("#Modal").modal("hide");
+                    $("#controller").trigger("submit");
+                 }
+                 // else display errors
+                 else {
+                    // form validation should cover the errors, but we may need to address them here in the future?
+                 }
+            },
+            error   : function( xhr, err ) {
+                 console.log(err);
+            }
+        });
+});
+
+$(document).on("click", ".edit_profile", function(e){
+    html = get_profile_form();
+    $("#ModalLabel").html("Edit Profile");
+    $("#ModalBody").html(html);
+    $("#Modal").modal("show");
+});
+
 $(document).on("click", "#delete-no", function(e){
     e.preventDefault();
     $("#confirmDeleteModal").modal("hide");
@@ -160,6 +206,12 @@ $(document).on("click", "#delete-no", function(e){
 $(document).on("click", "#confirm-no", function(e){
     e.preventDefault();
     $("#confirmModal").modal("hide");
+});
+
+$(document).on("click", "#close_profile_form", function(e){
+    e.preventDefault();
+
+    $("#Modal").modal("hide");
 });
 
 $(document).on("click", "#close_form", function(e){
@@ -277,6 +329,12 @@ function get_edit_form(id){
 
 function get_add_form(){
     url = "add_workout/";
+    html = get_chart_data(url);
+    return html;
+}
+
+function get_profile_form(){
+    url = "profile/";
     html = get_chart_data(url);
     return html;
 }
@@ -521,14 +579,14 @@ function strength_chart(ctx, myChart, start_date, end_date){
     } catch(err) {
         console.log(err);
     }
-    console.log(data);
+
     datasets = []
     for(group in data.groups){
         use_group = false;
 
         // check that the data has some values in it
-        for(var i = 0; i < data.workouts[group]['avg_weight'].length; i++){
-            if(data.workouts[group]['avg_weight'][i] > 0){
+        for(var i = 0; i < data.workouts[group]['total_weight'].length; i++){
+            if(data.workouts[group]['total_weight'][i] > 0){
                 use_group = true;
                 break;
             }
@@ -562,7 +620,87 @@ function strength_chart(ctx, myChart, start_date, end_date){
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Average Weight (kg)',
+                    labelString: 'Total Weight Moved (kg)',
+                }
+              }]
+            }
+        }
+    });
+
+    strength_detail(data);
+
+    return myChart;
+}
+
+function strength_detail_chart(ctx, myChart, start_date, end_date, group){
+    url = "api/strength_data?group=" + group;
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+
+    try {
+        ctx = clearChart();
+    } catch(err) {
+        console.log(err);
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: [{
+                label: 'Average Weight',
+                data: data.workouts[group]['avg_weight'],
+                yAxisID: 'A',
+                backgroundColor: convertHexToRGB(data.groups[group], 0.3),
+                borderColor: data.groups[group],
+                borderWidth: 1,
+            },
+            {
+                label: 'Max Weight',
+                data: data.workouts[group]['max_weight'],
+                yAxisID: 'A',
+                borderWidth: 1,
+                backgroundColor: 'rgba(225,50,120, 0.3)',
+                borderColor: 'rgba(225,50,120, 1.0)',
+            },
+            {
+                label: 'Total Weight',
+                data: data.workouts[group]['total_weight'],
+                yAxisID: 'B',
+                borderWidth: 1,
+                backgroundColor: 'rgba(50,225,150, 0.3)',
+                borderColor: 'rgba(50,225,150, 1.0)',
+            }],
+        },
+        options: {
+            spanGaps: true,
+            scales: {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Single Rep Weight (kg)',
+                }
+              },{
+                id: 'B',
+                type: 'linear',
+                position: 'right',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Total Weight Moved (kg)',
                 }
               }]
             }
@@ -575,10 +713,21 @@ function strength_chart(ctx, myChart, start_date, end_date){
 }
 
 function strength_detail(data){
-    html = '<div class="col-sm-12"><table class="table table-striped"><thead><tr><th>Date</th><th>Group</th><th>Sets</th><th>Reps</th><th>Total Weight</th><th>Max Weight</th><th>Avg Weight</th></tr></thead>';
+    html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight (kg)</th><th class="text-right">Max Weight (kg)</th><th class="text-right">Avg Weight (kg)</th></tr></thead>';
 
     for(var i=0; i<data.dates.length; i++){
-        html += '<tr><td>' + data.dates[i] + '</td></tr>';
+        if(data.tabular[data.dates[i]]){
+            for(group in data.tabular[data.dates[i]]){
+                html += '<tr style="background-color: '+ convertHexToRGB(data.groups[group], 0.35) +';"><td>' + data.dates[i] + '</td>';
+                html += '<td >' + group + '</td>';
+                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_sets'] + '</td>';
+                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_reps'] + '</td>';
+                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_weight'] + '</td>';
+                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['max_weight'] + '</td>';
+                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['avg_weight'] + '</td>';
+                html += '</tr>';
+            }
+        }
     }
 
     html += '</table></div>';

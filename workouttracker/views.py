@@ -10,7 +10,7 @@ import base64
 import numpy as np
 import datetime
 from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory
-from .forms import WorkoutSummaryForm, ExerciseFormSet
+from .forms import WorkoutSummaryForm, ExerciseFormSet, UserProfileForm, UserForm, PasswordForm
 
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
@@ -18,7 +18,7 @@ def date_to_string(date):
 def time_to_string(date):
     return str(date.hour).zfill(2) + ":" + str(date.minute).zfill(2)
 
-def get_dates_from_request(request, offset=7):
+def get_dates_from_request(request, offset=15):
     start_date = request.GET.get('start', None)
     end_date = request.GET.get('end', None)
 
@@ -52,8 +52,9 @@ def Index(request):
 
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
+    groups = MuscleGroup.objects.filter(type_id=2).filter(parent_id=None).all()
 
-    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date)})
+    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups})
 
 def ChartData(request):
     user = request.user
@@ -120,7 +121,6 @@ def ExerciseBreakdown(request):
                             data_dict[group.name]['dates'].append(date_str)
                         # handle multiple occurences of same exercise on a day
                         else:
-                            print("Duplicate group", group.name)
                             data_dict[group.name]['minutes'][i] += workout.duration
                             data_dict[group.name]['calories'][i] += workout.calories
 
@@ -194,11 +194,30 @@ def StrengthData(request):
     # add one day to the end_date since it is exclusive
     end_date = (end_date + datetime.timedelta(days=1))
 
+    group = request.GET.get("group", None)
+
     # get the breakdown
     user = request.user
-    workouts, groups, dates = WorkoutSummary.strength_training_history(user=user, start_date=start_date, end_date=end_date)
+    workouts, groups, dates = WorkoutSummary.strength_training_history(user=user, start_date=start_date, end_date=end_date, group=group)
 
-    return JsonResponse({'groups': groups, 'workouts': workouts, 'dates': dates}, safe=False)
+    # convert the data to a different format for the tabular report
+    tabular_dict = {}
+    for i, date in enumerate(dates):
+        # add the date to the dictionary
+        tabular_dict[date] = {}
+
+        # loop through the workouts and if there is data for the data add it
+        for group in workouts:
+            if workouts[group]['avg_weight'][i] is not None:
+                tabular_dict[date][group] = {
+                    'avg_weight': workouts[group]['avg_weight'][i],
+                    'max_weight': workouts[group]['max_weight'][i],
+                    'total_sets': workouts[group]['total_sets'][i],
+                    'total_reps': workouts[group]['total_reps'][i],
+                    'total_weight': workouts[group]['total_weight'][i],
+                }
+
+    return JsonResponse({'groups': groups, 'workouts': workouts, 'tabular': tabular_dict, 'dates': dates}, safe=False)
 
 def EditWorkoutSummary(request, pk):
     user = request.user
@@ -324,3 +343,27 @@ def DeleteWeight(request, pk):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
+
+def EditProfile(request):
+    user = request.user
+
+    if request.method == 'POST':
+        profile_form = UserProfileForm(request.POST, prefix="profile", instance=user)
+        user_form = UserForm(request.POST, prefix="user", instance=user)
+        password_form = PasswordForm(request.POST, prefix="password", instance=user)
+
+        if profile_form.is_valid() and user_form.is_valid():
+            profile_form.save()
+            user_form.save()
+
+            return JsonResponse({'success': True})
+
+        else:
+            return JsonResponse({profile_form.errors})
+
+    else:
+        profile_form = UserProfileForm(instance=user.workout_user, prefix="profile")
+        user_form = UserForm(instance=user, prefix="user")
+        password_form = PasswordForm(instance=user, prefix="password")
+
+    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'password_form': password_form})

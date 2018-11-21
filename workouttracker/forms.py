@@ -2,8 +2,9 @@ from django.forms import ModelForm
 from django import forms
 from datetime import datetime
 from django.forms.widgets import TextInput, SplitDateTimeWidget, SelectDateWidget
-from .models import MuscleGroup, WorkoutSummary, WorkoutDetail
+from .models import MuscleGroup, WorkoutSummary, WorkoutDetail, UserProfile
 from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget
+from django.contrib.auth.models import User
 
 class BootstrapModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -46,5 +47,40 @@ class WorkoutSummaryForm(BootstrapModelForm):
             'start': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 2})
         }
+
+class UserProfileForm(BootstrapModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['gender', 'height', 'birthdate']
+
+        widgets = {
+            'birthdate': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class UserForm(BootstrapModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+class PasswordForm(BootstrapModelForm):
+    old_password = forms.CharField(widget=forms.PasswordInput(), label="Old Password", required=False)
+    new_password = forms.CharField(widget=forms.PasswordInput(), label="New Password", required=False)
+    confirm_password = forms.CharField(widget=forms.PasswordInput(), label="Confirm Password", required=False)
+
+    def clean(self):
+        # clean the data
+        cleaned_data = super(PasswordForm, self).clean()
+
+        # check that the passwords match
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if new_password != confirm_password:
+            msg = "Your passwords do not match"
+            self.add_error('new_password', msg)
+
+    class Meta:
+        model = User
+        fields = ['old_password', 'new_password', 'confirm_password', ]
 
 ExerciseFormSet = forms.inlineformset_factory(WorkoutSummary, WorkoutDetail, form=WorkoutDetailForm, extra=4, can_delete=True)

@@ -148,6 +148,7 @@ class UserProfile(models.Model):
     daily_target = models.IntegerField(default=30)
     height = models.FloatField(default=80)
     age = models.IntegerField(default=40)
+    birthdate = models.DateField(null=True, blank=True)
 
     def __unicode__(self):
         return self.user.first_name
@@ -156,6 +157,14 @@ class UserProfile(models.Model):
         weight = WeightHistory.objects.filter(user_id=self.user_id).last()
         base_mets = 3.5 * weight.weight / 200
         return base_mets
+
+    def save(self, *args, **kwargs):
+        # calculate the age for the birthdate
+        today = datetime.date.today()
+        self.age = today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
+
+        # save the relationship as normal
+        super(UserProfile, self).save(*args, **kwargs)
 
 class BodyAreas(models.Model):
     name = models.CharField(max_length=50)
@@ -185,6 +194,7 @@ class MuscleGroup(models.Model):
     color = models.CharField(max_length=12)
     parent = models.ForeignKey("MuscleGroup", on_delete=models.DO_NOTHING, blank=True, null=True)
     area = models.ForeignKey(BodyAreas, on_delete=models.DO_NOTHING, blank=True, null=True)
+    type = models.ForeignKey("ExerciseType", on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -280,28 +290,34 @@ class WorkoutSummary(models.Model):
         super(WorkoutSummary, self).save(*args, **kwargs)
 
     @staticmethod
-    def strength_training_history(user,  end_date=None, start_date=None):
+    def strength_training_history(user,  end_date=None, start_date=None, group=None):
         if start_date is None:
-            start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+            start_date = (datetime.datetime.now() - datetime.timedelta(days=15)).date()
         if end_date is None:
             end_date = datetime.datetime.now().date()
 
         end_date = (end_date + datetime.timedelta(days=1))
 
-        workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date).order_by("start")
+        workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date)
+
+        if group is not None and group is not "":
+            workouts = workouts.filter(group__name=group)
+
+        workouts = workouts.order_by("start")
+
         workout_dict = {}
         groups = {}
         dates = []
         blanks = []
 
-        # create our list of dates
-        for workout in workouts:
-            exercises = workout.workoutdetail_set.all()
-            date = str(workout.start.year) + "-" + str(workout.start.month).zfill(2) + "-" + str(workout.start.day).zfill(2)
+        # create our list of dates - we will show all dates, not just those where exercise was performed
+        current_date = start_date
+        while(current_date <= end_date):
+            date = str(current_date.year) + "-" + str(current_date.month).zfill(2) + "-" + str(current_date.day).zfill(2)
+            dates.append(date)
+            current_date = (current_date + datetime.timedelta(days=1))
+            blanks.append(None)
 
-            if date not in dates:
-                dates.append(date)
-                blanks.append(None)
 
         for workout in workouts:
             group = workout.group.name
@@ -309,9 +325,6 @@ class WorkoutSummary(models.Model):
             if group not in workout_dict:
                 workout_dict[group] = {'avg_weight': copy.copy(blanks), 'max_weight': copy.copy(blanks), 'total_weight': copy.copy(blanks),'total_reps': copy.copy(blanks), 'total_sets': copy.copy(blanks)}
                 groups[group] = workout.group.color
-
-        print("Blanks:", blanks)
-        print("DIct:", workout_dict)
 
         for workout in workouts:
             exercises = workout.workoutdetail_set.all()
@@ -334,16 +347,11 @@ class WorkoutSummary(models.Model):
 
             if len(weights):
                 workout_dict[group]['max_weight'][idx] = np.max(weights)
-                workout_dict[group]['avg_weight'][idx] = np.mean(weights)
+                workout_dict[group]['avg_weight'][idx] = round(np.mean(weights), 2)
 
             workout_dict[group]['total_weight'][idx] = total_weight
             workout_dict[group]['total_sets'][idx] = total_sets
             workout_dict[group]['total_reps'][idx] = total_reps
-
-
-            print("TOtal Weight:", total_weight)
-            print("Total Reps:", total_reps)
-            print(workout_dict[group]['total_weight'])
 
         return workout_dict, groups, dates
 

@@ -34,12 +34,13 @@
                         <div class="col-sm-2">
                             <a class="add_workout" title="Add workout"><i class="fas fa-plus-circle big"></i></a>
                             <a class="add_weight" title="Add weight"><i class="fas fa-weight big"></i></a>
+                            <a class="edit_profile" title="Add weight"><i class="fas fa-user-circle big"></i></a>
                         </div>
 
                     </div>
                     <div class="row" style="padding: 5px;">
-                        <div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-success btn-block active date-filter-button">Week</button></div>
-                        <div class="col-sm-2 text-center"><button type="button" data-val="30" id="month_button" class="btn btn-secondary btn-block date-filter-button">Month</button></div>
+                        <div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-success btn-block date-filter-button">Week</button></div>
+                        <div class="col-sm-2 text-center"><button type="button" data-val="30" id="month_button" class="btn btn-secondary btn-block active date-filter-button">Month</button></div>
                         <div class="col-sm-2 text-center"><button type="button" data-val="365" id="year_button" class="btn btn-secondary btn-block date-filter-button">Year</button></div>
 
                         <label class="control-label col-sm-1" for="chart">View:</label>
@@ -49,7 +50,7 @@
                                 <option value="breakdown">Breakdown by Group</option>
                                 <!--<option value="totals">Workout Summary</option>-->
                                 <option value="details">Workout Details</option>
-                                <option value="strength">Weight Moved</option>
+                                <option value="strength">Strength Training</option>
                                 <option value="weight">Weight History</option>
                             </select>
                         </div>
@@ -60,6 +61,25 @@
             </form>
         </div>
     </div>
+
+    <div class="row strength-drill-down" style="display: none;">
+        <div class="col-sm-12">
+            <form class="form form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-sm-2">Filter By:</label>
+                    <div class="col-sm-4">
+                        <select name="group" id="strength-group" class="form-control">
+                            <option value="">-- All --</option>
+                            {% for group in groups %}
+                                <option value="{{ group.name }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="row" id="charts" style="display: block;">
         <div class="col-md-12">
             <div id="summary_chart" style="display: block;">
@@ -82,5 +102,5 @@
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
-<script src="{% static 'js/scripts.js' %}"></script>
+<script src="{% static 'workouttracker/js/scripts.js' %}"></script>
 {% endblock %}

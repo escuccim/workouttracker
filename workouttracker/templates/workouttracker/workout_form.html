@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block body %}
-<!--<div class="container">-->
     {% if workout.id %}
         <form action="{% url 'workout:edit_workout_form' workout.id %}" id="edit_workout_form" method="post">
     {% else %}
@@ -37,7 +36,7 @@
             </div>
         </div>
         {{ exercise_form.management_form }}
-        <div class="exercise_detail_form" style="display: none;">
+        <div class="exercise_detail_form" {% if not workout.id %}style="display: none;"{% endif %}>
             <div class="row">
                 <div class="col-sm-3">
                     <label for="exercise">Exercise:</label>
@@ -111,26 +110,11 @@
         <div class="row">
            <div class="col-sm-12 text-right">
                <button type="submit" class="btn btn-primary" name="save_btn" value="continue">Save</button>
-               <button type="button" class="btn btn-secondary" id="close_form" data-val="{{ date }}">Close</button>
+               <button type="button" class="btn btn-secondary close_form" id="close_form" data-val="{{ date }}">Close</button>
            </div>
         </div>
     </form>
-<!--</div>-->
 {% endblock %}
 
 {% block styles %}
-<!--<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />-->
-<!--<link rel="stylesheet" href="/static/admin/css/widgets.css">-->
-<!--<script type="text/javascript" src="/admin/jsi18n/"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/core.js"></script>-->
-
-<!--<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/actions.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/urlify.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>-->
-<!--<script type="text/javascript" src="/static/admin/js/inlines.js"></script>-->
-<!--{{ form.media }}-->
 {%endblock %}
