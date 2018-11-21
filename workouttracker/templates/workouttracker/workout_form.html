@@ -114,6 +114,12 @@
            </div>
         </div>
     </form>
+
+    {% if workout.id %}
+        <script>
+            $("#id_summary-type").trigger("change");
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block styles %}

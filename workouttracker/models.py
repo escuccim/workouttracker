@@ -257,6 +257,9 @@ class WorkoutDetail(models.Model):
         # save the relationship as normal
         super(WorkoutDetail, self).save(*args, **kwargs)
 
+        # update the parent summary with the new caloires
+        self.summary.save()
+
     def __str__(self):
         return str(self.workout.start) + " - " + self.workout.group.name + " - " + self.exercise.name
 
@@ -312,12 +315,14 @@ class WorkoutSummary(models.Model):
 
         # create our list of dates - we will show all dates, not just those where exercise was performed
         current_date = start_date
-        while(current_date <= end_date):
+        while(current_date < end_date):
             date = str(current_date.year) + "-" + str(current_date.month).zfill(2) + "-" + str(current_date.day).zfill(2)
             dates.append(date)
             current_date = (current_date + datetime.timedelta(days=1))
             blanks.append(None)
 
+        # remove the last day since that is the day after the end of the period
+        dates.pop()
 
         for workout in workouts:
             group = workout.group.name
