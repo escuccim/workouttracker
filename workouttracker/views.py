@@ -84,6 +84,15 @@ def ChartData(request):
 
     return JsonResponse({'dates': dates, 'calories': list(calories_list), 'minutes': list(minutes_list)}, safe=False)
 
+def ChartSummary(request):
+    user = request.user
+    # get our start and end dates from URL or default to one week up to and including today
+    start_date, end_date = get_dates_from_request(request)
+
+    workouts = WorkoutSummary.summary_breakdown(user, start_date=start_date, end_date=end_date)
+
+    return JsonResponse(workouts)
+
 def ExerciseBreakdown(request):
     user = request.user
     # get our start and end dates from URL or default to one week up to and including today

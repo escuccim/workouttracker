@@ -361,6 +361,27 @@ class WorkoutSummary(models.Model):
         return workout_dict, groups, dates
 
     @staticmethod
+    def summary_breakdown(user, end_date=None, start_date=None):
+        if start_date is None:
+            start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+        if end_date is None:
+            end_date = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
+
+        end_date = (end_date + datetime.timedelta(days=1))
+
+        workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date).order_by("-start")
+
+        workout_dict = {}
+        for workout in workouts:
+            if workout.type.name not in workout_dict:
+                workout_dict[workout.type.name] = {'minutes' : [workout.duration], 'calories': [workout.calories]}
+            else:
+                workout_dict[workout.type.name]['minutes'].append(workout.duration)
+                workout_dict[workout.type.name]['calories'].append(workout.calories)
+        print(workout_dict)
+        return workout_dict
+
+    @staticmethod
     def workouts_by_day(user, end_date=None, start_date=None):
         if start_date is None:
             start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()

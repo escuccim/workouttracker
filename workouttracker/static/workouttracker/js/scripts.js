@@ -479,6 +479,43 @@ function get_chart_data(url){
 var ctx = document.getElementById("myChart").getContext('2d');
 var myChart;
 
+function add(a, b) {
+    return a + b;
+}
+
+function summary_text(start_date, end_date){
+    url = "api/chart_summary?foo=bar";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+    html = '<div class="row"><div class="col-sm-12"><table class="table table-striped"><thead><tr><th>Item</th><th class="text-right">Total Time (min)</th><th class="text-right">Avg Time / Day (min)<th class="text-right">Total Calories</th><th class="text-right">Avg Calories / Day</th></tr></thead>';
+
+    total_total_min = 0;
+    total_total_kcal = 0;
+
+    for(group in data){
+        count = data[group]['calories'].length;
+        total_kcal = data[group]['calories'].reduce(add, 0);
+        total_min = data[group]['minutes'].reduce(add, 0);
+
+        total_total_kcal += total_kcal;
+        total_total_min += total_min;
+
+        html += '<tr><td>' + group + '</td><td class="text-right">'+total_min+'</td><td class="text-right">'+ (total_min / count).toFixed(1) + '</td><td class="text-right">'+total_kcal+'</td><td class="text-right">'+ (total_kcal / count).toFixed(1) +'</td></tr>';
+    }
+
+    html += '<tr><td><b>Total:</b></td><td class="text-right">'+total_total_min+'</td><td class="text-right">'+ (total_total_min / count).toFixed(1) + '</td><td class="text-right">'+total_total_kcal+'</td><td class="text-right">'+ (total_total_kcal / count).toFixed(1) + '</td></tr>';
+
+    html += '</table></div></div>';
+
+    $("#details").html(html);
+    $("#details").show();
+}
+
 function summary_chart(ctx, myChart, start_date, end_date){
     url = "api/chart_data?foo=bar";
     if(start_date != undefined){
@@ -553,6 +590,8 @@ function summary_chart(ctx, myChart, start_date, end_date){
             }
         }
     });
+
+    summary_text(start_date, end_date);
 
     return myChart;
 }
@@ -665,8 +704,8 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group){
                 data: data.workouts[group]['max_weight'],
                 yAxisID: 'A',
                 borderWidth: 1,
-                backgroundColor: 'rgba(225,50,120, 0.3)',
-                borderColor: 'rgba(225,50,120, 1.0)',
+                backgroundColor: 'rgba(50,120,120, 0.3)',
+                borderColor: 'rgba(50,120,120, 1.0)',
             },
             {
                 label: 'Total Weight',
