@@ -146,7 +146,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name="workout_user")
     gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default="M")
     daily_target = models.IntegerField(default=30)
-    height = models.FloatField(default=80)
+    height = models.FloatField(default=177)
     age = models.IntegerField(default=40)
     birthdate = models.DateField(null=True, blank=True)
 

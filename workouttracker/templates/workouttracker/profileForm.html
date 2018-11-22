@@ -2,6 +2,15 @@
 {% load static %}
 
 {% block body %}
+{% if msg %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-danger" role="alert">
+                {{ msg }}
+            </div>
+        </div>
+    </div>
+{% endif %}
 <form action="{% url 'workout:edit_profile' %}" method="post" id="profile_form" class="form form-horizontal">
     {% csrf_token %}
     <div class="row">

@@ -103,4 +103,9 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
 <script src="{% static 'workouttracker/js/scripts.js' %}"></script>
+{% if not has_profile %}
+<script>
+    $(".edit_profile").trigger("click");
+</script>
+{% endif %}
 {% endblock %}

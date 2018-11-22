@@ -48,13 +48,21 @@ def Index(request):
         return redirect('%s?next=%s' % ('/en/user/login', request.path))
 
     user = request.user
+
+    # make sure the user has a workout profile
+    try:
+        workout_user = user.workout_user
+        has_profile = True
+    except:
+        has_profile = False
+
     start_date, end_date = get_dates_from_request(request)
 
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
     groups = MuscleGroup.objects.filter(type_id=2).filter(parent_id=None).all()
 
-    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups})
+    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile})
 
 def ChartData(request):
     user = request.user
@@ -357,12 +365,25 @@ def EditProfile(request):
     user = request.user
 
     if request.method == 'POST':
-        profile_form = UserProfileForm(request.POST, prefix="profile", instance=user.workout_user)
         user_form = UserForm(request.POST, prefix="user", instance=user)
 
+        # handle the case if the user does not have an existing profile
+        try:
+            profile_form = UserProfileForm(request.POST, prefix="profile", instance=user.workout_user)
+            new_user = False
+        except:
+            profile_form = UserProfileForm(request.POST, prefix="profile")
+            new_user = True
+
         if profile_form.is_valid() and user_form.is_valid():
-            profile_form.save()
             user_form.save()
+
+            if not new_user:
+                profile_form.save()
+            else:
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.save()
 
             return JsonResponse({'success': True})
 
@@ -370,7 +391,15 @@ def EditProfile(request):
             return JsonResponse(profile_form.errors)
 
     else:
-        profile_form = UserProfileForm(instance=user.workout_user, prefix="profile")
         user_form = UserForm(instance=user, prefix="user")
 
-    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form})
+        # handle the case if the user does not have an existing profile
+        try:
+            profile_form = UserProfileForm(instance=user.workout_user, prefix="profile")
+            msg = None
+        except:
+            profile_form = UserProfileForm(prefix="profile")
+            msg = "Your gender, height, and age are required to calculate the calories burned during exercises. Please fill out this form."
+
+
+    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'msg': msg})

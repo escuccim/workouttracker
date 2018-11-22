@@ -54,7 +54,7 @@ class UserProfileForm(BootstrapModelForm):
         fields = ['gender', 'height', 'birthdate']
 
         widgets = {
-            'birthdate': forms.DateInput(attrs={'type': 'date'}),
+            'birthdate': forms.DateInput(attrs={'type': 'date', 'required': 'true'}),
         }
 
 class UserForm(BootstrapModelForm):
