@@ -258,7 +258,7 @@ class WorkoutDetail(models.Model):
         super(WorkoutDetail, self).save(*args, **kwargs)
 
         # update the parent summary with the new caloires
-        self.summary.save()
+        self.workout.save()
 
     def __str__(self):
         return str(self.workout.start) + " - " + self.workout.group.name + " - " + self.exercise.name
@@ -378,7 +378,7 @@ class WorkoutSummary(models.Model):
             else:
                 workout_dict[workout.type.name]['minutes'].append(workout.duration)
                 workout_dict[workout.type.name]['calories'].append(workout.calories)
-        print(workout_dict)
+
         return workout_dict
 
     @staticmethod

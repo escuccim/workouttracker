@@ -357,9 +357,8 @@ def EditProfile(request):
     user = request.user
 
     if request.method == 'POST':
-        profile_form = UserProfileForm(request.POST, prefix="profile", instance=user)
+        profile_form = UserProfileForm(request.POST, prefix="profile", instance=user.workout_user)
         user_form = UserForm(request.POST, prefix="user", instance=user)
-        password_form = PasswordForm(request.POST, prefix="password", instance=user)
 
         if profile_form.is_valid() and user_form.is_valid():
             profile_form.save()
@@ -368,11 +367,10 @@ def EditProfile(request):
             return JsonResponse({'success': True})
 
         else:
-            return JsonResponse({profile_form.errors})
+            return JsonResponse(profile_form.errors)
 
     else:
         profile_form = UserProfileForm(instance=user.workout_user, prefix="profile")
         user_form = UserForm(instance=user, prefix="user")
-        password_form = PasswordForm(instance=user, prefix="password")
 
-    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'password_form': password_form})
+    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form})

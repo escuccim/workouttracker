@@ -25,20 +25,6 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-12">
-            <hr>
-        </div>
-        {% for field in password_form %}
-            <div class="col-sm-3 padded">
-                {{ field.label_tag }}
-            </div>
-            <div class="col-sm-9 padded">
-                {{ field }}
-            </div>
-        {% endfor %}
-    </div>
-
-    <div class="row">
        <div class="col-sm-12 text-right">
            <button type="submit" class="btn btn-primary" name="save_btn" value="continue">Save</button>
            <button type="button" class="btn btn-secondary" id="close_profile_form" data-val="{{ date }}">Close</button>
