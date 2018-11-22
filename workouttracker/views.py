@@ -45,7 +45,7 @@ def fig_to_base64(fig):
 # Create your views here.
 def Index(request):
     if not request.user.is_authenticated:
-        return redirect('register:login')
+        return redirect('%s?next=%s' % ('register:login', request.path))
 
     user = request.user
     start_date, end_date = get_dates_from_request(request)
