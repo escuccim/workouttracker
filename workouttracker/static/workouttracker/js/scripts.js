@@ -191,6 +191,33 @@ $(document).on("submit", "#profile_form", function(e){
         });
 });
 
+$(document).on("change", "#id_summary-type", function(e){
+    type = $(this).val();
+    url = "api/exercise_by_type/" + type;
+    data = get_chart_data(url);
+
+    populate_exercise_list(data);
+});
+
+$(document).on("change", "#id_summary-group", function(e){
+    type = $("#id_summary-type").val();
+    group = $(this).val();
+    url = "api/exercise_by_group/" + type + "/" + group;
+    data = get_chart_data(url);
+
+    populate_exercise_list(data);
+});
+
+function populate_exercise_list(data){
+    // remove the existing options
+    $(".exercise-list option").remove();
+
+    // add the new options back in
+    for(var i = 0; i < data.length; i++){
+        $(".exercise-list").append('<option value=' + data[i].id + '>'+ data[i].name + '</option>');
+    }
+}
+
 $(document).on("click", ".edit_profile", function(e){
     html = get_profile_form();
     $("#ModalLabel").html("Edit Profile");

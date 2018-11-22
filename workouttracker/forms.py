@@ -28,7 +28,7 @@ class WorkoutDetailForm(ModelForm):
         model = WorkoutDetail
         fields = ['exercise', 'sets', 'reps', 'weight', 'intensity', 'duration', 'distance']
         widgets = {
-            'exercise': forms.Select(attrs={'style': 'width: 100%', 'class': 'form-control'}),
+            'exercise': forms.Select(attrs={'style': 'width: 100%', 'class': 'form-control exercise-list'}),
             'intensity': forms.Select(attrs={'style': 'width: 100%;', 'class': 'form-control'}),
             'distance': forms.NumberInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
             'reps': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
@@ -39,6 +39,10 @@ class WorkoutDetailForm(ModelForm):
 
 class WorkoutSummaryForm(BootstrapModelForm):
     time = forms.TimeField(initial=datetime.now().time(), widget=forms.TimeInput(attrs={'type': 'time'}))
+
+    def __init__(self, *args, **kwargs):
+        super(WorkoutSummaryForm, self).__init__(*args, **kwargs)
+        self.fields['group'].queryset = self.fields['group'].queryset.filter(parent_id=None)
 
     class Meta:
         model = WorkoutSummary

@@ -9,7 +9,7 @@ import io
 import base64
 import numpy as np
 import datetime
-from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory
+from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory, Exercise
 from .forms import WorkoutSummaryForm, ExerciseFormSet, UserProfileForm, UserForm, PasswordForm
 
 def date_to_string(date):
@@ -403,3 +403,13 @@ def EditProfile(request):
 
 
     return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'msg': msg})
+
+def ExerciseByType(request, type):
+    exercises = Exercise.objects.filter(type_id=type).all().values()
+
+    return JsonResponse(list(exercises), safe=False)
+
+def ExerciseByGroup(request, type, group):
+    exercises = Exercise.objects.filter(type_id=type).filter(main_group_id=group).all().values()
+
+    return JsonResponse(list(exercises), safe=False)
