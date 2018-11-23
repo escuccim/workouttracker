@@ -266,8 +266,7 @@ def EditWorkoutSummary(request, pk):
         form = WorkoutSummaryForm(instance=workout, prefix="summary")
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
-
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start)})
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start), 'edit': True})
 
 def AddWorkoutSummary(request):
     user = request.user
@@ -301,8 +300,7 @@ def AddWorkoutSummary(request):
         form = WorkoutSummaryForm(instance=workout, prefix="summary")
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
-
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout})
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'edit': False})
 
 def DeleteWorkout(request, pk):
     user = request.user

@@ -209,13 +209,26 @@ $(document).on("change", "#id_summary-group", function(e){
 });
 
 function populate_exercise_list(data){
+    // get the values of the current selections, if any
+    fields = $(".exercise-list")
+    selections = []
+
+    fields.each(function(index){
+        selections.push($(this).val());
+    });
+
     // remove the existing options
     $(".exercise-list option").remove();
-
+    $(".exercise-list").append('<option value=""> ------ </option>');
     // add the new options back in
     for(var i = 0; i < data.length; i++){
-        $(".exercise-list").append('<option value=' + data[i].id + '>'+ data[i].name + '</option>');
+        $(".exercise-list").append('<option value="' + data[i].id + '">'+ data[i].name + '</option>');
     }
+
+    // loop through the fields again and reset the selections
+    fields.each(function(index){
+        selections.push($(this).val(selections[index]));
+    });
 }
 
 $(document).on("click", ".edit_profile", function(e){
