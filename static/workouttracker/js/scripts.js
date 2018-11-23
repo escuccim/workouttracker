@@ -695,6 +695,15 @@ function strength_chart(ctx, myChart, start_date, end_date){
             datasets: datasets,
         },
         options: {
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
+                    }
+                }
+            },
             spanGaps: true,
             scales: {
               yAxes: [ {
@@ -765,6 +774,15 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group){
         },
         options: {
             spanGaps: true,
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
+                    }
+                }
+            },
             scales: {
               yAxes: [ {
                 id: 'A',
@@ -866,6 +884,15 @@ function breakdown_chart(ctx, myChart, start_date, end_date){
             datasets: datasets,
         },
         options: {
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' min';
+                    }
+                }
+            },
             scales: {
               yAxes: [{
                 id: 'A',
