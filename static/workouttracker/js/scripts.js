@@ -60,11 +60,11 @@ $("#add_weight").on("click", function(e){
 
 $("#strength-group").on("change", function(e){
     group = $(this).val();
-
+    by = $("#strength-unit-group").val();
     if(group != ""){
         start_date = $("#start_date").val();
         end_date = $("#end_date").val();
-        strength_detail_chart(ctx, myChart, start_date, end_date, $(this).val());
+        strength_detail_chart(ctx, myChart, start_date, end_date, $(this).val(), by);
     } else {
         strength_chart(ctx, myChart, start_date, end_date, by);
     }
