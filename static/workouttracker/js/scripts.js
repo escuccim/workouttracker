@@ -24,6 +24,7 @@ $("#controller").on("submit", function(e){
         weight_chart(ctx, myChart, start_date, end_date);
     } else if(chart == "strength"){
         $(".strength-drill-down").show();
+        $("#strength-group").val("");
         strength_chart(ctx, myChart, start_date, end_date);
     }
 });
@@ -63,10 +64,9 @@ $("#strength-group").on("change", function(e){
     if(group != ""){
         start_date = $("#start_date").val();
         end_date = $("#end_date").val();
-
         strength_detail_chart(ctx, myChart, start_date, end_date, $(this).val());
     } else {
-        strength_chart(ctx, myChart, start_date, end_date);
+        strength_chart(ctx, myChart, start_date, end_date, by);
     }
 });
 
@@ -88,6 +88,20 @@ $(".add_weight").on("click", function(e){
     $("#weight_id").val();
     $("#previous_weight").show();
     $("#weightModal").modal("show");
+});
+
+$(document).on("change", "#strength-unit-group", function(e){
+    e.preventDefault();
+    by = $(this).val();
+    group = $("#strength-group").val();
+    if(group != ""){
+        start_date = $("#start_date").val();
+        end_date = $("#end_date").val();
+
+        strength_detail_chart(ctx, myChart, start_date, end_date, group, by);
+    } else {
+        strength_chart(ctx, myChart, start_date, end_date, by);
+    }
 });
 
 $(document).on("click", ".time_now", function(e){
@@ -650,7 +664,8 @@ function convertHexToRGB(hex, alpha)
     return color;
 }
 
-function strength_chart(ctx, myChart, start_date, end_date){
+function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
+    console.log(by);
     url = "api/strength_data?foo=bar";
     if(start_date != undefined){
         url += "&start=" + start_date;
@@ -666,46 +681,29 @@ function strength_chart(ctx, myChart, start_date, end_date){
         console.log(err);
     }
 
-    datasets = []
-    for(group in data.groups){
-        use_group = false;
+    if(by == "weight"){
+        datasets = []
+        for(group in data.groups){
+            use_group = false;
 
-        // check that the data has some values in it
-        for(var i = 0; i < data.workouts[group]['total_weight'].length; i++){
-            if(data.workouts[group]['total_weight'][i] > 0){
-                use_group = true;
-                break;
-            }
-        }
-        if(use_group){
-            datasets.push({
-                label: group,
-                data: data.workouts[group].total_weight,
-                borderWidth: 1,
-                backgroundColor: convertHexToRGB(data.groups[group], 0.3),
-                borderColor: data.groups[group],
-            });
-        }
-    }
-
-    myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.dates,
-            datasets: datasets,
-        },
-        options: {
-            tooltips: {
-                enabled: true,
-                mode: 'single',
-                callbacks: {
-                    label: function(tooltipItems, data) {
-                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
-                    }
+            // check that the data has some values in it
+            for(var i = 0; i < data.workouts[group]['total_weight'].length; i++){
+                if(data.workouts[group]['total_weight'][i] > 0){
+                    use_group = true;
+                    break;
                 }
-            },
-            spanGaps: true,
-            scales: {
+            }
+            if(use_group){
+                datasets.push({
+                    label: group,
+                    data: data.workouts[group].total_weight,
+                    borderWidth: 1,
+                    backgroundColor: convertHexToRGB(data.groups[group], 0.3),
+                    borderColor: data.groups[group],
+                });
+            }
+        };
+        scales = {
               yAxes: [ {
                 id: 'A',
                 type: 'linear',
@@ -718,7 +716,72 @@ function strength_chart(ctx, myChart, start_date, end_date){
                     labelString: 'Total Weight Moved (kg)',
                 }
               }]
+            };
+        callbacks = {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
+                    }
+                };
+    } else{
+        datasets = []
+        for(group in data.groups){
+            use_group = false;
+
+            // check that the data has some values in it
+            for(var i = 0; i < data.workouts[group]['total_reps'].length; i++){
+                if(data.workouts[group]['total_reps'][i] > 0){
+                    use_group = true;
+                    break;
+                }
             }
+            if(use_group){
+                datasets.push({
+                    label: group,
+                    yAxisID: 'A',
+                    data: data.workouts[group].total_reps,
+                    borderWidth: 1,
+                    backgroundColor: convertHexToRGB(data.groups[group], 0.3),
+                    borderColor: data.groups[group],
+                });
+            }
+        };
+
+        scales = {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Total Reps',
+                }
+              }]
+            }
+        callbacks = {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' reps';
+                    }
+                };
+    }
+
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: datasets,
+        },
+        options: {
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: callbacks,
+            },
+            spanGaps: true,
+            scales: scales,
         }
     });
 
@@ -727,7 +790,8 @@ function strength_chart(ctx, myChart, start_date, end_date){
     return myChart;
 }
 
-function strength_detail_chart(ctx, myChart, start_date, end_date, group){
+function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="weight"){
+    console.log(by);
     url = "api/strength_data?group=" + group;
     if(start_date != undefined){
         url += "&start=" + start_date;
@@ -743,11 +807,8 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group){
         console.log(err);
     }
 
-    myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.dates,
-            datasets: [{
+    if(by == "weight"){
+        datasets = [{
                 label: 'Average Weight',
                 data: data.workouts[group]['avg_weight'],
                 yAxisID: 'A',
@@ -770,20 +831,9 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group){
                 borderWidth: 1,
                 backgroundColor: 'rgba(50,225,150, 0.3)',
                 borderColor: 'rgba(50,225,150, 1.0)',
-            }],
-        },
-        options: {
-            spanGaps: true,
-            tooltips: {
-                enabled: true,
-                mode: 'single',
-                callbacks: {
-                    label: function(tooltipItems, data) {
-                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
-                    }
-                }
-            },
-            scales: {
+            }];
+
+        scales = {
               yAxes: [ {
                 id: 'A',
                 type: 'linear',
@@ -807,7 +857,70 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group){
                     labelString: 'Total Weight Moved (kg)',
                 }
               }]
-            }
+            }  ;
+    } else {
+        datasets = [{
+                label: 'Total Sets',
+                data: data.workouts[group]['total_sets'],
+                yAxisID: 'A',
+                backgroundColor: convertHexToRGB(data.groups[group], 0.3),
+                borderColor: data.groups[group],
+                borderWidth: 1,
+            },
+            {
+                label: 'Total Reps',
+                data: data.workouts[group]['total_reps'],
+                yAxisID: 'B',
+                borderWidth: 1,
+                backgroundColor: 'rgba(50,175,120, 0.3)',
+                borderColor: 'rgba(50,120,175, 1.0)',
+            },
+           ];
+         scales = {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Sets',
+                }
+              },{
+                id: 'B',
+                type: 'linear',
+                position: 'right',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Reps',
+                }
+              }]
+            }  ;
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: datasets,
+        },
+        options: {
+            spanGaps: true,
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
+                    }
+                }
+            },
+            scales: scales,
         }
     });
 
