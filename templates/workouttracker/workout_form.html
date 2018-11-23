@@ -14,7 +14,17 @@
         <input type="hidden" name="saved" id="saved" value="0">
         <div class="row" style="padding: 5px;">
             {% for field in form %}
-                {% if field.name != 'notes' %}
+                {% if field.name == "time" %}
+                    <div class="col-sm-2 padded">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="col-sm-3 padded">
+                         {{ field }}
+                    </div>
+                    <div class="col-sm-1 padded">
+                        <a class="time_now">Now</a>
+                    </div>
+                {% elif field.name != 'notes' %}
                     <div class="col-sm-2 padded">
                         {{ field.label_tag }}
                     </div>

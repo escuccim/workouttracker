@@ -90,6 +90,13 @@ $(".add_weight").on("click", function(e){
     $("#weightModal").modal("show");
 });
 
+$(document).on("click", ".time_now", function(e){
+    e.preventDefault();
+    var d = new Date();
+    now = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+    $("#id_summary-time").val(now);
+});
+
 // change the add/edit form according to the type of workout selected
 $(document).on("change", "#id_summary-type", function(e){
     val = $(this).val();
@@ -548,7 +555,7 @@ function summary_text(start_date, end_date){
         html += '<tr><td>' + group + '</td><td class="text-right">'+total_min+'</td><td class="text-right">'+ (total_min / count).toFixed(1) + '</td><td class="text-right">'+total_kcal+'</td><td class="text-right">'+ (total_kcal / count).toFixed(1) +'</td></tr>';
     }
 
-    html += '<tr><td><b>Total:</b></td><td class="text-right">'+total_total_min+'</td><td class="text-right">'+ (total_total_min / count).toFixed(1) + '</td><td class="text-right">'+total_total_kcal+'</td><td class="text-right">'+ (total_total_kcal / count).toFixed(1) + '</td></tr>';
+    html += '<tr class="row_top_border"><td><b>Total:</b></td><td class="text-right">'+total_total_min+'</td><td class="text-right">'+ (total_total_min / count).toFixed(1) + '</td><td class="text-right">'+total_total_kcal+'</td><td class="text-right">'+ (total_total_kcal / count).toFixed(1) + '</td></tr>';
 
     html += '</table></div></div>';
 
