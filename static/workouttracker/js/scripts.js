@@ -107,7 +107,7 @@ $(document).on("change", "#strength-unit-group", function(e){
 $(document).on("click", ".time_now", function(e){
     e.preventDefault();
     var d = new Date();
-    now = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+    now = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0') + ':' + d.getSeconds().toString().padStart(2, '0');
     $("#id_summary-time").val(now);
 });
 
