@@ -410,3 +410,24 @@ def ExerciseByGroup(request, type, group):
     exercises = Exercise.objects.filter(type_id=type).filter(main_group_id=group).all().values()
 
     return JsonResponse(list(exercises), safe=False)
+
+def StrengthDetails(request):
+    user = request.user
+    date = request.GET.get("date", None)
+    group = request.GET.get("group", None)
+
+    if date is None or group is None:
+        return JsonResponse({'error': True})
+    else:
+        start_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        end_date = start_date + datetime.timedelta(days=1)
+
+    workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date).filter(group__name=group)
+
+    workout_dict = {}
+    for workout in workouts:
+        exercises = workout.workoutdetail_set.all()
+        for exercise in exercises:
+            workout_dict[exercise.exercise.name] = {'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight)}
+
+    return JsonResponse(workout_dict)

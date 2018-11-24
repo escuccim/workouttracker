@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^api/breakdown', views.ExerciseBreakdown, name="chart_breakdown"),
     url(r'^api/details', views.WorkoutDetails, name="workout_details"),
     url(r'^api/exercise_detail/(?P<id>\d+)', views.ExerciseDetails, name="exercise_detail"),
+    url(r'^api/strength_detail/', views.StrengthDetails, name="strength_detail"),
     url(r'^api/exercise_by_type/(?P<type>\d+)', views.ExerciseByType, name="exercise_by_type"),
     url(r'^api/exercise_by_group/(?P<type>\d+)/(?P<group>\d+)', views.ExerciseByGroup, name="exercise_by_group"),
     url(r'^api/weight', views.WeightDetails, name="weight_detail"),

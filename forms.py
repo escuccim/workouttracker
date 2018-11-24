@@ -38,7 +38,7 @@ class WorkoutDetailForm(ModelForm):
         }
 
 class WorkoutSummaryForm(BootstrapModelForm):
-    time = forms.TimeField(initial=datetime.now().time(), widget=forms.TimeInput(attrs={'type': 'time'}))
+    time = forms.TimeField(initial=datetime.now().time(), widget=forms.TimeInput(attrs={'type': 'time', 'step': 1}))
 
     def __init__(self, *args, **kwargs):
         super(WorkoutSummaryForm, self).__init__(*args, **kwargs)

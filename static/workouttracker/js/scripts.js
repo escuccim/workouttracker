@@ -29,6 +29,35 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(document).on("click", ".expand_strength", function(e){
+    e.preventDefault();
+    date = $(this).data("date");
+    group = $(this).data("group");
+    group_escaped = group.replace(/\s+/g, '-')
+
+    url = "api/strength_detail?date=" + date + "&group=" + group;
+
+    // toggle the thing open or closed
+    current_html = $(this).html();
+    if(current_html == '<i class="fas fa-plus"></i>'){
+        data = get_chart_data(url);
+
+        if(!data.error){
+            $(this).html('<i class="fas fa-minus"></i>');
+
+            html = show_strength_detail(data);
+
+
+            $("#detail_" +  date + "_" + group_escaped).html(html);
+            $("#detail_" +  date + "_" + group_escaped).show();
+        }
+
+    } else {
+        $(this).html('<i class="fas fa-plus"></i>');
+        $("#detail_" +  date + "_" + group_escaped).hide();
+    }
+});
+
 $("#add_weight").on("click", function(e){
     e.preventDefault();
     console.log("Save!");
@@ -228,6 +257,20 @@ $(document).on("change", "#id_summary-group", function(e){
 
     populate_exercise_list(data);
 });
+
+function show_strength_detail(data){
+    html = '<td></td><td colspan=7><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Weight (kg)</th><th class="text-right">Weight Moved (kg)</th></tr></thead>';
+    for(exercise in data){
+        html += '<tr><td>' + exercise + '</td>';
+        html += '<td class="text-right">' + data[exercise].sets + '</td>';
+        html += '<td class="text-right">' + data[exercise].reps + '</td>';
+        html += '<td class="text-right">' + data[exercise].weight + '</td>';
+        html += '<td class="text-right">' + data[exercise].total_weight + '</td>';
+        html += '</tr>';
+    }
+    html += '</table></td>';
+    return html;
+}
 
 function populate_exercise_list(data){
     // get the values of the current selections, if any
@@ -930,19 +973,26 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="we
 }
 
 function strength_detail(data){
-    html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight (kg)</th><th class="text-right">Max Weight (kg)</th><th class="text-right">Avg Weight (kg)</th></tr></thead>';
-
-    for(var i=0; i<data.dates.length; i++){
-        if(data.tabular[data.dates[i]]){
-            for(group in data.tabular[data.dates[i]]){
-                html += '<tr style="background-color: '+ convertHexToRGB(data.groups[group], 0.35) +';"><td>' + data.dates[i] + '</td>';
+    html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight (kg)</th><th class="text-right">Max Weight (kg)</th><th class="text-right">Avg Weight (kg)</th><th></th></tr></thead>';
+    console.log(data.dates);
+    dates = data.dates.reverse()
+    console.log(dates);
+    for(var i=0; i < dates.length; i++){
+        if(data.tabular[dates[i]]){
+            for(group in data.tabular[dates[i]]){
+                group_escaped = group.replace(/\s+/g, '-');
+                html += '<tr style="background-color: '+ convertHexToRGB(data.groups[group], 0.35) +';"><td>' + dates[i] + '</td>';
                 html += '<td >' + group + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_sets'] + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_reps'] + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_weight'] + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['max_weight'] + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['avg_weight'] + '</td>';
+                html += '<td class="text-right"><a class="expand_strength" id="' +  dates[i] + '_' + group_escaped + '" data-date="' + dates[i] + '" data-group="' + group + '"><i class="fas fa-plus"></i></a></td>';
                 html += '</tr>';
+
+                // add the blank row to contain the details
+                html += '<tr id="detail_' +  dates[i] + '_' + group_escaped + '" style="display: none;"></tr>';
             }
         }
     }

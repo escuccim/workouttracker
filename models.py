@@ -301,7 +301,7 @@ class WorkoutSummary(models.Model):
 
         end_date = (end_date + datetime.timedelta(days=1))
 
-        workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date)
+        workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date).order_by("-start")
 
         if group is not None and group is not "":
             workouts = workouts.filter(group__name=group)
