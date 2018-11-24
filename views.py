@@ -114,8 +114,6 @@ def ExerciseBreakdown(request):
         date += datetime.timedelta(days=1)
     dates.append(date)
 
-    print(dates)
-
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     major_groups = MuscleGroup.objects.filter(parent_id=None).order_by("area__order", "name")
 
@@ -241,7 +239,6 @@ def EditWorkoutSummary(request, pk):
     workout = WorkoutSummary.objects.filter(user=request.user).get(id=pk)
 
     if request.method == 'POST':
-        print(request.POST)
         form = WorkoutSummaryForm(request.POST, prefix="summary", instance=workout)
         exercise_form = ExerciseFormSet(request.POST, prefix="detail", instance=workout)
 
@@ -266,7 +263,8 @@ def EditWorkoutSummary(request, pk):
         form = WorkoutSummaryForm(instance=workout, prefix="summary")
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start), 'edit': True})
+    time = workout.start.strftime("%H:%M:%S")
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start), 'time': time, 'edit': True})
 
 def AddWorkoutSummary(request):
     user = request.user
@@ -300,7 +298,8 @@ def AddWorkoutSummary(request):
         form = WorkoutSummaryForm(instance=workout, prefix="summary")
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'edit': False})
+    time = datetime.datetime.now().strftime("%H:%M:%S")
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'time': time, 'edit': False})
 
 def DeleteWorkout(request, pk):
     user = request.user

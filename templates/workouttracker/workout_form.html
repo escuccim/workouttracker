@@ -131,6 +131,8 @@
     <script>
         {% if workout.id %}
             $("#id_summary-type").trigger("change");
+            //console.log("{{time}}");
+            $("#id_summary-time").val("{{time}}");
         {% endif %}
         {% if workout.group_id %}
             // $("#id_summary-group").trigger("change");
