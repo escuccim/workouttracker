@@ -2,9 +2,6 @@
 {% load static %}
 
 {% block body %}
-    {% if edit is True %}
-        EDIT
-    {% endif %}
     {% if workout.id %}
         <form action="{% url 'workout:edit_workout_form' workout.id %}" id="edit_workout_form" method="post">
     {% else %}
@@ -129,9 +126,8 @@
     </form>
 
     <script>
-        {% if workout.id %}
+        {% if workout.id or edit %}
             $("#id_summary-type").trigger("change");
-            //console.log("{{time}}");
             $("#id_summary-time").val("{{time}}");
         {% endif %}
         {% if workout.group_id %}

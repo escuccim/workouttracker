@@ -16,6 +16,7 @@
                 <div class="panel panel-default">
 
                     <div class="row" style="padding: 5px;">
+                        <div class="col-sm-1"></div>
                         <label class="control-label col-sm-1" for="start_date">Start:</label>
                         <div class="col-sm-3">
                             <input class="form-control" id="start_date" name="start_date" type="date" value="{{ start_date }}">
@@ -26,12 +27,8 @@
                             <input class="form-control" id="end_date" name="end_date" type="date" value="{{ end_date }}">
                         </div>
 
-                        <div class="col-sm-2">
-                            <button type="submit" class="btn btn-block btn-action btn-sm">Update</button>
-                        </div>
 
-
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             <a class="add_workout" title="Add workout"><i class="fas fa-plus-circle big"></i></a>
                             <a class="add_weight" title="Add weight"><i class="fas fa-weight big"></i></a>
                             <a class="edit_profile" title="Add weight"><i class="fas fa-user-circle big"></i></a>
@@ -39,7 +36,8 @@
 
                     </div>
                     <div class="row" style="padding: 5px;">
-                        <div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-secondary btn-block date-filter-button">Week</button></div>
+                        <div class="col-sm-1"></div>
+                        <!--<div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-secondary btn-block date-filter-button">Week</button></div>-->
                         <div class="col-sm-2 text-center"><button type="button" data-val="30" id="month_button" class="btn btn-success btn-block active date-filter-button">Month</button></div>
                         <div class="col-sm-2 text-center"><button type="button" data-val="365" id="year_button" class="btn btn-secondary btn-block date-filter-button">Year</button></div>
 
@@ -55,7 +53,9 @@
                             </select>
                         </div>
 
-
+                        <div class="col-sm-2">
+                            <button type="submit" class="btn btn-block btn-action btn-sm">Update</button>
+                        </div>
                     </div>
                 </div>
             </form>
