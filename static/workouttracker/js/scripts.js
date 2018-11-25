@@ -141,8 +141,19 @@ $(document).on("click", ".time_now", function(e){
 });
 
 // change the add/edit form according to the type of workout selected
+// also pre-select the group as appropriate
 $(document).on("change", "#id_summary-type", function(e){
     val = $(this).val();
+
+    if(val == ""){
+        val = 0;
+    }
+
+    url = "api/exercise_by_type/" + val;
+    data = get_chart_data(url);
+
+    populate_exercise_list(data);
+
     $(".exercise_detail_form").show();
     if(val == 2){
         $(".strength_field").show();
@@ -150,10 +161,16 @@ $(document).on("change", "#id_summary-type", function(e){
     } else if (val == 5){
         $(".strength_field").hide();
         $(".walk_field").show();
-    } else if (val == 1 || val == 3){
+        $("#id_summary-group").val(24);
+    } else if (val == 1){
         $(".strength_field").hide();
         $(".walk_field").hide();
-    } else {
+        $("#id_summary-group").val(20);
+    } else if ( val == 3) {
+        $(".strength_field").hide();
+        $(".walk_field").hide();
+        $("#id_summary-group").val(21);
+    }else {
         $(".strength_field").hide();
         $(".walk_field").hide();
     }
@@ -239,14 +256,6 @@ $(document).on("submit", "#profile_form", function(e){
                  console.log(err);
             }
         });
-});
-
-$(document).on("change", "#id_summary-type", function(e){
-    type = $(this).val();
-    url = "api/exercise_by_type/" + type;
-    data = get_chart_data(url);
-
-    populate_exercise_list(data);
 });
 
 $(document).on("change", "#id_summary-group", function(e){

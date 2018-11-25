@@ -402,7 +402,11 @@ def EditProfile(request):
     return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'msg': msg})
 
 def ExerciseByType(request, type):
-    exercises = Exercise.objects.filter(type_id=type).all().values()
+    if type is not 0 and type is not 4:
+        exercises = Exercise.objects.filter(type_id=type).all().values()
+    else:
+        exercises = Exercise.objects.all().values()
+
 
     return JsonResponse(list(exercises), safe=False)
 
