@@ -115,7 +115,7 @@ def ExerciseBreakdown(request):
     dates.append(date)
 
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
-    major_groups = MuscleGroup.objects.filter(parent_id=None).order_by("area__order", "name")
+    major_groups = MuscleGroup.objects.filter(parent_id=None).exclude(id=24).order_by("area__order", "name")
 
     # make a list of all the major muscle groups
     muscle_groups = []
@@ -161,6 +161,7 @@ def WorkoutDetails(request):
     dates = summaries['dates']
     workouts_dict = {}
     for date in dates:
+        workouts_dict[date] = []
         if date in workouts:
             for workout in workouts[date]:
                 if date in workouts_dict:

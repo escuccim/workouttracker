@@ -60,7 +60,7 @@ $(document).on("click", ".expand_strength", function(e){
 
 $("#add_weight").on("click", function(e){
     e.preventDefault();
-    console.log("Save!");
+
     weight_val = $("#weight").val();
     body_fat_val = $("#bodyfat").val();
     errors = false;
@@ -236,7 +236,7 @@ $(document).on("click", "#delete-yes", function(e){
 
 $(document).on("submit", "#profile_form", function(e){
     e.preventDefault();
-    console.log("submit!")
+
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -351,7 +351,7 @@ $(document).on("click", "#close_form", function(e){
 
 $(document).on("submit", "#weight_form", function(e){
     e.preventDefault();
-    console.log("submit!")
+
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -433,6 +433,10 @@ $(document).on("click", ".edit-workout", function(e){
     $("#ModalBody").html(html);
     $("#Modal").modal("show");
 });
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 function get_edit_form(id){
     url = "edit_workout/" + id;
@@ -582,7 +586,6 @@ function get_chart_data(url){
             data = result;
         },
         error: function(err){
-            console.log("Error!");
             console.log(err);
         }
         });
@@ -618,10 +621,10 @@ function summary_text(start_date, end_date){
         total_total_kcal += total_kcal;
         total_total_min += total_min;
 
-        html += '<tr><td>' + group + '</td><td class="text-right">'+total_min+'</td><td class="text-right">'+ (total_min / count).toFixed(1) + '</td><td class="text-right">'+total_kcal+'</td><td class="text-right">'+ (total_kcal / count).toFixed(1) +'</td></tr>';
+        html += '<tr><td>' + group + '</td><td class="text-right">'+ numberWithCommas(total_min) +'</td><td class="text-right">'+ numberWithCommas((total_min / count).toFixed(1)) + '</td><td class="text-right">'+ numberWithCommas(total_kcal) +'</td><td class="text-right">'+ numberWithCommas((total_kcal / count).toFixed(1)) +'</td></tr>';
     }
 
-    html += '<tr class="row_top_border"><td><b>Total:</b></td><td class="text-right">'+total_total_min+'</td><td class="text-right">'+ (total_total_min / count).toFixed(1) + '</td><td class="text-right">'+total_total_kcal+'</td><td class="text-right">'+ (total_total_kcal / count).toFixed(1) + '</td></tr>';
+    html += '<tr class="row_top_border"><td><b>Total:</b></td><td class="text-right">'+numberWithCommas(total_total_min)+'</td><td class="text-right">'+ numberWithCommas((total_total_min / count).toFixed(1)) + '</td><td class="text-right">'+ numberWithCommas(total_total_kcal) +'</td><td class="text-right">'+ numberWithCommas((total_total_kcal / count).toFixed(1)) + '</td></tr>';
 
     html += '</table></div></div>';
 
@@ -717,7 +720,7 @@ function convertHexToRGB(hex, alpha)
 }
 
 function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
-    console.log(by);
+
     url = "api/strength_data?foo=bar";
     if(start_date != undefined){
         url += "&start=" + start_date;
@@ -994,9 +997,9 @@ function strength_detail(data){
                 html += '<td >' + group + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_sets'] + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_reps'] + '</td>';
-                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_weight'] + '</td>';
-                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['max_weight'] + '</td>';
-                html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['avg_weight'] + '</td>';
+                html += '<td class="text-right">' + numberWithCommas(data.tabular[data.dates[i]][group]['total_weight']) + '</td>';
+                html += '<td class="text-right">' + numberWithCommas(data.tabular[data.dates[i]][group]['max_weight']) + '</td>';
+                html += '<td class="text-right">' + numberWithCommas(data.tabular[data.dates[i]][group]['avg_weight']) + '</td>';
                 html += '<td class="text-right"><a class="expand_strength" id="' +  dates[i] + '_' + group_escaped + '" data-date="' + dates[i] + '" data-group="' + group + '"><i class="fas fa-plus"></i></a></td>';
                 html += '</tr>';
 
@@ -1310,7 +1313,7 @@ function display_summary(start_date, end_date){
         // while we are looping through groups also create a struct to hold the weekly totals
         totals[data.groups[i]] = 0;
     }
-    html += '<td>' + totals['total'] + ' min</td>';
+    html += '<td>' + numberWithCommas(totals['total']) + ' min</td>';
 
     html += '</tr></table></div>';
     $("#details").html(html);
