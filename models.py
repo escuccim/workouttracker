@@ -276,7 +276,7 @@ class WorkoutSummary(models.Model):
     type = models.ForeignKey(ExerciseType, on_delete=models.DO_NOTHING)
     group = models.ForeignKey(MuscleGroup, on_delete=models.DO_NOTHING)
     calories = models.IntegerField(default=0)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     intensity = models.IntegerField(choices=((0, 'Very Low'), (1, 'Low'), (2, 'Moderate'), (3, 'High')), default=2)
     calculated_calories = models.IntegerField(default=0)
     avg_heartrate = models.IntegerField(default=0)
