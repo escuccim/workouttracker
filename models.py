@@ -271,7 +271,7 @@ class WorkoutDetail(models.Model):
 
 # Create your models here.
 class WorkoutSummary(models.Model):
-    start = models.DateTimeField(default=datetime.datetime.now())
+    start = models.DateTimeField(default=django.utils.timezone.now)
     duration = models.IntegerField(default=0)
     type = models.ForeignKey(ExerciseType, on_delete=models.DO_NOTHING)
     group = models.ForeignKey(MuscleGroup, on_delete=models.DO_NOTHING)
