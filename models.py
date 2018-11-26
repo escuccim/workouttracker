@@ -178,7 +178,7 @@ class BodyAreas(models.Model):
         verbose_name_plural = "Body Areas"
 
 class WeightHistory(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime = models.DateTimeField()
     weight = models.FloatField(default=0)
     units = models.CharField(max_length=5, choices=(("kg","kg"), ("lbs", "lbs")))
