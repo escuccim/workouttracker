@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 import numpy as np
 import copy
 import datetime
+from django import utils
 
 def calories_burned_walking(summary):
     user = UserProfile.objects.filter(user_id=summary.user_id).first()
@@ -271,7 +272,7 @@ class WorkoutDetail(models.Model):
 
 # Create your models here.
 class WorkoutSummary(models.Model):
-    start = models.DateTimeField(default=django.utils.timezone.now)
+    start = models.DateTimeField(default=utils.timezone.now)
     duration = models.IntegerField(default=0)
     type = models.ForeignKey(ExerciseType, on_delete=models.DO_NOTHING)
     group = models.ForeignKey(MuscleGroup, on_delete=models.DO_NOTHING)
