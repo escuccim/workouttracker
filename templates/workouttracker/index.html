@@ -1,15 +1,10 @@
-{% extends 'workouttracker/base.html' %}
+{% extends 'base.html' %}
 {% load dict_key %}
 {% load index %}
 {% load static %}
 
 {% block body %}
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>Workout Tracker : {{ user.first_name }}</h1>
-        </div>
-    </div>
     <div class="row">
         <div class="col-md-12">
             <form class="form form-horizontal" id="controller">
