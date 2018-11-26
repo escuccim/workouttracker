@@ -174,6 +174,9 @@ class BodyAreas(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ['name']
         verbose_name_plural = "Body Areas"
@@ -211,6 +214,9 @@ class ExerciseType(models.Model):
     order = models.IntegerField(default=0)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     class Meta:
