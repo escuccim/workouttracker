@@ -846,7 +846,6 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
 }
 
 function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="weight"){
-    console.log(by);
     url = "api/strength_data?group=" + group;
     if(start_date != undefined){
         url += "&start=" + start_date;
@@ -986,9 +985,7 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="we
 
 function strength_detail(data){
     html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight (kg)</th><th class="text-right">Max Weight (kg)</th><th class="text-right">Avg Weight (kg)</th><th></th></tr></thead>';
-    console.log(data.dates);
-    dates = data.dates.reverse()
-    console.log(dates);
+    dates = data.dates.reverse();
     for(var i=0; i < dates.length; i++){
         if(data.tabular[dates[i]]){
             for(group in data.tabular[dates[i]]){

@@ -49,7 +49,9 @@ class WorkoutSummaryForm(BootstrapModelForm):
         fields = ['start', 'time',  'type', 'group', 'duration', 'intensity', 'calories', 'avg_heartrate', 'notes']
         widgets = {
             'start': forms.DateInput(attrs={'type': 'date'}),
-            'notes': forms.Textarea(attrs={'rows': 2})
+            'notes': forms.Textarea(attrs={'rows': 2}),
+            'calories': forms.NumberInput(attrs={'disabled': True})
+
         }
 
 class UserProfileForm(BootstrapModelForm):
