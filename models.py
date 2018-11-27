@@ -148,6 +148,7 @@ class UserProfile(models.Model):
     gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default="M")
     daily_target = models.IntegerField(default=30)
     height = models.FloatField(default=177)
+    units = models.CharField(max_length=5, choices=(("cm", "cm"), ("in", "in")), default="cm")
     age = models.IntegerField(default=40)
     birthdate = models.DateField(null=True, blank=True)
 
@@ -185,7 +186,7 @@ class WeightHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime = models.DateTimeField()
     weight = models.FloatField(default=0)
-    units = models.CharField(max_length=5, choices=(("kg","kg"), ("lbs", "lbs")))
+    units = models.CharField(max_length=5, choices=(("kg","kg"), ("lbs", "lbs")), default="kg")
     bodyfat = models.FloatField(default=0)
 
     class Meta:
@@ -246,6 +247,7 @@ class WorkoutDetail(models.Model):
     reps = models.IntegerField(default=0)
     sets = models.IntegerField(default=0)
     weight = models.FloatField(default=0)
+    units = models.CharField(max_length=5, choices=(("kg", "kg"), ("lbs", "lbs")), default="kg")
     duration = models.FloatField(default=0)
     intensity = models.IntegerField(choices=((0, 'Very Low'), (1, 'Low'), (2, 'Moderate'), (3, 'High')), default=2)
     calories = models.FloatField(default=0)

@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^add_workout/', views.AddWorkoutSummary, name="add_workout_form"),
     url(r'^api/delete_workout/(?P<pk>\d+)', views.DeleteWorkout, name="delete_workout"),
     url(r'^api/chart_data', views.ChartData, name="chart_data"),
+    url(r'^api/export_data', views.ExportData, name="export_data"),
     url(r'^api/chart_summary', views.ChartSummary, name="chart_summary"),
     url(r'^api/strength_data', views.StrengthData, name="strength_data"),
     url(r'^api/breakdown', views.ExerciseBreakdown, name="chart_breakdown"),

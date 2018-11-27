@@ -29,6 +29,25 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(document).on("click", ".export_data", function(e){
+    e.preventDefault();
+
+    // show please wait thing
+    $("#WaitModalBody").html("Please wait...");
+    $("#waitModal").modal("show");
+
+    url = "api/export_data"
+    data = get_chart_data(url);
+
+    if(data.prefix){
+        html = '<a href="/media/' + data.prefix + '_weights.csv">Weight History</a><br/>';
+        html += '<a href="/media/' + data.prefix + '_workout_summaries.csv">Workout Summaries</a><br/>';
+        html += '<a href="/media/' + data.prefix + '_workout_details.csv">Workout Details</a><br/>';
+    }
+
+    $("#WaitModalBody").html(html);
+});
+
 $(document).on("click", ".expand_strength", function(e){
     e.preventDefault();
     date = $(this).data("date");

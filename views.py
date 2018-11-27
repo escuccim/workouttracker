@@ -11,6 +11,7 @@ import numpy as np
 import datetime
 from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory, Exercise
 from .forms import WorkoutSummaryForm, ExerciseFormSet, UserProfileForm, UserForm, PasswordForm
+import os
 
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
@@ -440,3 +441,47 @@ def StrengthDetails(request):
                 workout_dict[exercise.exercise.name] = [{'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight)}]
 
     return JsonResponse(workout_dict)
+
+def ExportData(request):
+    import pandas as pd
+    user = request.user
+
+    if user.is_authenticated:
+        file_prefix = date_to_string(datetime.datetime.now()) + "_" + str(user.id)
+
+        # export weight history
+        weight_history = WeightHistory.objects.filter(user=user).order_by("datetime")
+        weight_df = pd.DataFrame(columns=['Date', 'Weight', 'Units', 'Bodyfat'])
+
+        for i, weight in enumerate(weight_history):
+            weight_df.loc[i] = [weight.datetime.date(), weight.weight, weight.units, weight.bodyfat]
+
+        weight_path = os.path.join(settings.MEDIA_ROOT, file_prefix + "_weights.csv")
+        weight_df.to_csv(weight_path, index=False)
+
+        # export workout summaries
+        workouts = WorkoutSummary.objects.filter(user=user).order_by("start")
+
+        summary_df = pd.DataFrame(columns=['id', 'date', 'type', 'group', 'duration', 'calories', 'intensity', 'avg_heartrate', 'notes'])
+        summary_path = os.path.join(settings.MEDIA_ROOT, file_prefix + "_workout_summaries.csv")
+
+        for i, summary in enumerate(workouts):
+            summary_df.loc[i] = [summary.id, date_to_string(summary.start), summary.type.name, summary.group.name, summary.duration, summary.calories, summary.intensity, summary.avg_heartrate, summary.notes]
+
+        summary_df.to_csv(summary_path, index=False)
+
+        # export workout details
+        details = WorkoutDetail.objects.filter(workout__user=user).order_by("workout__start")
+        details_path = os.path.join(settings.MEDIA_ROOT, file_prefix + "_workout_details.csv")
+
+        detail_df = pd.DataFrame(columns=['workout_id', 'id', 'exercise', 'reps', 'sets', 'weight', 'units', 'duration', 'distance', 'intensity'])
+
+        for i, detail in enumerate(details):
+            detail_df.loc[i] = [detail.workout_id, detail.id, detail.exercise.name, detail.reps, detail.sets, detail.weight, detail.units, detail.duration, detail.distance, detail.intensity]
+
+            detail_df.to_csv(details_path, index=False)
+
+        return JsonResponse({'prefix': file_prefix})
+
+    else:
+        return JsonResponse({'status': 'error'})
