@@ -270,12 +270,14 @@ $(document).on("change", "#id_summary-group", function(e){
 function show_strength_detail(data){
     html = '<td></td><td colspan=7><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Weight (kg)</th><th class="text-right">Weight Moved (kg)</th></tr></thead>';
     for(exercise in data){
-        html += '<tr><td>' + exercise + '</td>';
-        html += '<td class="text-right">' + data[exercise].sets + '</td>';
-        html += '<td class="text-right">' + data[exercise].reps + '</td>';
-        html += '<td class="text-right">' + data[exercise].weight + '</td>';
-        html += '<td class="text-right">' + data[exercise].total_weight + '</td>';
-        html += '</tr>';
+        for(var i=0; i<data[exercise].length; i++){
+            html += '<tr><td>' + exercise + '</td>';
+            html += '<td class="text-right">' + data[exercise][i].sets + '</td>';
+            html += '<td class="text-right">' + data[exercise][i].reps + '</td>';
+            html += '<td class="text-right">' + data[exercise][i].weight + '</td>';
+            html += '<td class="text-right">' + data[exercise][i].total_weight + '</td>';
+            html += '</tr>';
+        }
     }
     html += '</table></td>';
     return html;
