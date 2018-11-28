@@ -504,6 +504,16 @@ $(".date-filter-button").on("click", function(e){
     $(this).addClass("btn-success");
     $(this).removeClass("btn-secondary");
 
+    end_date = $("#end_date").val();
+
+    // if end date is blank fill it with today's date
+    if(end_date == ""){
+        end_date = new Date();
+        end_date_str = end_date.getFullYear() + '-' + (end_date.getMonth()+1).toString().padStart(2, '0') + '-' + end_date.getDate().toString().padStart(2, '0');
+        $("#end_date").val(end_date_str);
+
+    }
+
     start_date = new Date($("#end_date").val());
 
     // convert the date into a properly formatted string
