@@ -50,6 +50,7 @@ def Index(request):
         return redirect('%s?next=%s' % ('/en/user/login', request.path))
 
     user = request.user
+    profile = user.workout_user
 
     # make sure the user has a workout profile
     try:
@@ -64,7 +65,7 @@ def Index(request):
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
     groups = MuscleGroup.objects.filter(type_id=2).filter(parent_id=None).all()
 
-    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile})
+    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile, 'profile':  profile })
 
 def ChartData(request):
     user = request.user
@@ -182,6 +183,7 @@ def ExerciseDetails(request, id):
     for workout in details:
         dict = model_to_dict(workout)
         dict['exercise'] = workout.exercise.name
+        dict['user_units'] = user.workout_user.unit_type
         data.append(dict)
 
     return JsonResponse(data, safe=False)
@@ -193,16 +195,29 @@ def WeightDetails(request):
     end_date = (end_date + datetime.timedelta(days=1))
 
     user = request.user
+    units = user.workout_user.unit_type
+    if units == "metric":
+        unit_label = "kg"
+    else:
+        unit_label = "lbs"
+
     weights = WeightHistory.objects.filter(user=user).filter(datetime__gte=start_date).filter(datetime__lte=end_date)
 
     weight_dict = {'dates': [], 'weights': [], 'bodyfats': [], 'units': [], 'ids': []}
     for weight in weights:
         date_str = date_to_string(weight.datetime)
         weight_dict['dates'].append(date_str)
-        weight_dict['weights'].append(weight.weight)
         weight_dict['bodyfats'].append(weight.bodyfat)
-        weight_dict['units'].append(weight.units)
+        weight_dict['units'].append(unit_label)
         weight_dict['ids'].append(weight.id)
+
+        # make sure all weights are converted to users preferences
+        if units == "metric" and weight.units == "lbs":
+            weight_dict['weights'].append(round(weight.weight / 2.2, 1))
+        elif units == "imp" and weight.units == "kg":
+            weight_dict['weights'].append(round(weight.weight * 2.2, 1))
+        else:
+            weight_dict['weights'].append(round(weight.weight, 1))
 
     return JsonResponse(weight_dict, safe=False)
 
@@ -235,7 +250,7 @@ def StrengthData(request):
                     'total_weight': workouts[group]['total_weight'][i],
                 }
 
-    return JsonResponse({'groups': groups, 'workouts': workouts, 'tabular': tabular_dict, 'dates': dates}, safe=False)
+    return JsonResponse({'groups': groups, 'workouts': workouts, 'tabular': tabular_dict, 'dates': dates, 'units': user.workout_user.unit_type}, safe=False)
 
 def EditWorkoutSummary(request, pk):
     user = request.user
@@ -257,7 +272,18 @@ def EditWorkoutSummary(request, pk):
             workout.save()
 
             # save the details
-            exercise_form.save()
+            details = exercise_form.save(commit=False)
+
+            for detail in details:
+                detail.workout = workout
+
+                # handle unit conversion
+                if user.workout_user.unit_type == "imp":
+                    print("Converting...")
+                    detail.units = "kgs"
+                    detail.weight = detail.weight / 2.2
+
+                detail.save()
 
             return JsonResponse({'success': True, 'id': workout.id })
         else:
@@ -267,7 +293,7 @@ def EditWorkoutSummary(request, pk):
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
     time = workout.start.strftime("%H:%M:%S")
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start), 'time': time, 'edit': True})
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'date': date_to_string(workout.start), 'time': time, 'edit': True, 'profile': user.workout_user })
 
 def AddWorkoutSummary(request):
     user = request.user
@@ -290,8 +316,15 @@ def AddWorkoutSummary(request):
 
             # save the details
             details = exercise_form.save(commit=False)
+
             for detail in details:
                 detail.workout = workout
+
+                # handle unit conversion
+                if user.workout_user.unit_type == "imp":
+                    detail.units = "kgs"
+                    detail.weight = detail.weight / 2.2
+
                 detail.save()
 
             return JsonResponse({'success': True, 'id': workout.id})
@@ -302,7 +335,7 @@ def AddWorkoutSummary(request):
         exercise_form = ExerciseFormSet(instance=workout, prefix="detail")
 
     time = datetime.datetime.now().strftime("%H:%M:%S")
-    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'time': time, 'edit': False})
+    return render(request, 'workouttracker/workout_form.html', {'form': form, 'exercise_form': exercise_form, 'workout': workout, 'time': time, 'edit': False, 'profile': user.workout_user})
 
 def DeleteWorkout(request, pk):
     user = request.user
@@ -327,6 +360,8 @@ def AddWeight(request):
     new_weight = request.POST.get("weight")
     id = request.POST.get("id")
 
+    units = user.workout_user.unit_type
+
     if new_weight:
         if id:
             weight = WeightHistory.objects.filter(user=user).filter(pk=id).first()
@@ -337,8 +372,9 @@ def AddWeight(request):
             weight.datetime = datetime.datetime.now()
             weight.user = user
 
-        weight.weight = new_weight
-        weight.units = "kg"
+        if units == "imp":
+            weight.weight = float(new_weight) / 2.2
+            weight.units = "kg"
 
         if bodyfat:
             weight.bodyfat = bodyfat
@@ -432,6 +468,7 @@ def StrengthDetails(request):
     workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date).filter(group__name=group)
 
     workout_dict = {}
+
     for workout in workouts:
         exercises = workout.workoutdetail_set.all()
         for exercise in exercises:
@@ -441,7 +478,7 @@ def StrengthDetails(request):
             else:
                 workout_dict[exercise.exercise.name] = [{'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight)}]
 
-    return JsonResponse(workout_dict)
+    return JsonResponse({'workouts': workout_dict, 'units': user.workout_user.unit_type })
 
 def ExportData(request):
     user = request.user

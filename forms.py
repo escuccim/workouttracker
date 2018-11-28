@@ -33,7 +33,7 @@ class WorkoutDetailForm(ModelForm):
             'distance': forms.NumberInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
             'reps': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
             'sets': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
-            'weight': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
+            'weight': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control weight_field'}),
             'duration': forms.TextInput(attrs={'style': 'width: 100%;', 'min': 0, 'class': 'form-control'}),
         }
 
@@ -57,10 +57,15 @@ class WorkoutSummaryForm(BootstrapModelForm):
 class UserProfileForm(BootstrapModelForm):
     class Meta:
         model = UserProfile
-        fields = ['gender', 'height', 'birthdate']
+        fields = ['gender', 'height', 'birthdate', 'unit_type']
 
         widgets = {
             'birthdate': forms.DateInput(attrs={'type': 'date', 'required': 'true'}),
+        }
+
+        labels = {
+            'unit_type': 'Units',
+            'birthdate': 'Date of Birth',
         }
 
 class UserForm(BootstrapModelForm):

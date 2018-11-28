@@ -131,12 +131,17 @@ $(".add_weight").on("click", function(e){
     data = get_chart_data("api/get_weight");
     if(data.weight){
         $("#last_weight").html(data.weight);
+        $("#weight_units").html(data.units);
         $("#last_weight_date").html(data.date);
     }
     $("#weight_id").val();
     $("#previous_weight").show();
     $("#weightModal").modal("show");
 });
+
+function kgs_to_lbs(number){
+    return Math.round(number * 100 * 2.2)  / 100;
+}
 
 $(document).on("change", "#strength-unit-group", function(e){
     e.preventDefault();
@@ -287,14 +292,22 @@ $(document).on("change", "#id_summary-group", function(e){
 });
 
 function show_strength_detail(data){
-    html = '<td></td><td colspan=7><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Weight (kg)</th><th class="text-right">Weight Moved (kg)</th></tr></thead>';
-    for(exercise in data){
-        for(var i=0; i<data[exercise].length; i++){
+    if(data.units == "imp"){
+        label_str = "lbs";
+        multiplier = 2.2;
+    } else {
+        label_str = "kg";
+        multiplier = 1;
+    }
+
+    html = '<td></td><td colspan=7><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Weight ('+label_str+')</th><th class="text-right">Weight Moved ('+label_str+')</th></tr></thead>';
+    for(exercise in data.workouts){
+        for(var i=0; i<data.workouts[exercise].length; i++){
             html += '<tr><td>' + exercise + '</td>';
-            html += '<td class="text-right">' + data[exercise][i].sets + '</td>';
-            html += '<td class="text-right">' + data[exercise][i].reps + '</td>';
-            html += '<td class="text-right">' + data[exercise][i].weight + '</td>';
-            html += '<td class="text-right">' + data[exercise][i].total_weight + '</td>';
+            html += '<td class="text-right">' + data.workouts[exercise][i].sets + '</td>';
+            html += '<td class="text-right">' + data.workouts[exercise][i].reps + '</td>';
+            html += '<td class="text-right">' + Math.round(data.workouts[exercise][i].weight * multiplier * 100) / 100 + '</td>';
+            html += '<td class="text-right">' + Math.round(data.workouts[exercise][i].total_weight * multiplier * 100) / 100 + '</td>';
             html += '</tr>';
         }
     }
@@ -560,11 +573,18 @@ function display_exercise_detail(id, data){
     for(var i = 0; i < data.length; i++){
         html += '<tr><td>' + data[i].exercise + '</td>';
         if(data[i].sets != 0 && data[i].reps != 0){
+            if(data[i].user_units == "imp") {
+                label_str = "lbs";
+                multiplier = 2.2;
+            } else {
+                label_str = "kg";
+                multiplier = 1;
+            }
             html += '<td class="text-right">' + data[i].sets + '</td>';
             html += '<td class="text-right">' + data[i].reps + '</td>';
-            html += '<td class="text-right">' + data[i].weight + ' kg</td>';
-            html += '<td class="text-right">' + (data[i].weight * data[i].reps * data[i].sets) + ' kg</td>';
-            total_weight_moved += (data[i].weight * data[i].reps * data[i].sets);
+            html += '<td class="text-right">' + Math.round(data[i].weight * multiplier * 100) / 100 + ' ' + label_str + '</td>';
+            html += '<td class="text-right">' + Math.round(data[i].weight * data[i].reps * data[i].sets * multiplier * 100) / 100 + ' ' + label_str + '</td>';
+            total_weight_moved += (data[i].weight * data[i].reps * data[i].sets * multiplier);
             total_sets += data[i].sets;
             total_reps += data[i].reps;
         } else {
@@ -580,7 +600,7 @@ function display_exercise_detail(id, data){
     if(cardio){
         html += '<tr><td><b>Totals</b></td><td class="text-right">' + total_duration + '</td><td class="text-right">-</td><td class="text-right">' + total_calories + '</td></tr>';
     } else {
-        html += '<tr><td><b>Totals</b></td><td class="text-right">' + total_sets + '</td><td class="text-right">' + total_reps + '</td><td class="text-right">-</td><td class="text-right">' + total_weight_moved + ' kg</td></tr>';
+        html += '<tr><td><b>Totals</b></td><td class="text-right">' + total_sets + '</td><td class="text-right">' + total_reps + '</td><td class="text-right">-</td><td class="text-right">' + Math.round(total_weight_moved * 100) / 100 + ' ' + label_str + '</td></tr>';
     }
 
     html += '</table></div>';
@@ -757,6 +777,12 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
         console.log(err);
     }
 
+    if(data.units == "imp"){
+        label_str = "lbs";
+    } else {
+        label_str = "kg";
+    }
+
     if(by == "weight"){
         datasets = []
         for(group in data.groups){
@@ -769,6 +795,11 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
                     break;
                 }
             }
+
+            if(data.units == "imp"){
+                data.workouts[group].total_weight = data.workouts[group].total_weight.map(kgs_to_lbs);
+            }
+
             if(use_group){
                 datasets.push({
                     label: group,
@@ -789,13 +820,13 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Total Weight Moved (kg)',
+                    labelString: 'Total Weight Moved ('+label_str +')',
                 }
               }]
             };
         callbacks = {
                     label: function(tooltipItems, data) {
-                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' kg';
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' ' + label_str;
                     }
                 };
     } else{
@@ -1005,7 +1036,15 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="we
 }
 
 function strength_detail(data){
-    html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight (kg)</th><th class="text-right">Max Weight (kg)</th><th class="text-right">Avg Weight (kg)</th><th></th></tr></thead>';
+    if(data.units == "imp"){
+        label_str = "lbs";
+        multiplier = 2.2;
+    } else {
+        label_str = "kg";
+        multiplier = 1;
+    }
+
+    html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight ('+label_str+')</th><th class="text-right">Max Weight ('+label_str+')</th><th class="text-right">Avg Weight ('+label_str+')</th><th></th></tr></thead>';
     dates = data.dates.reverse();
     for(var i=0; i < dates.length; i++){
         if(data.tabular[dates[i]]){
@@ -1015,9 +1054,9 @@ function strength_detail(data){
                 html += '<td >' + group + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_sets'] + '</td>';
                 html += '<td class="text-right">' + data.tabular[data.dates[i]][group]['total_reps'] + '</td>';
-                html += '<td class="text-right">' + numberWithCommas(data.tabular[data.dates[i]][group]['total_weight']) + '</td>';
-                html += '<td class="text-right">' + numberWithCommas(data.tabular[data.dates[i]][group]['max_weight']) + '</td>';
-                html += '<td class="text-right">' + numberWithCommas(data.tabular[data.dates[i]][group]['avg_weight']) + '</td>';
+                html += '<td class="text-right">' + numberWithCommas(Math.round(data.tabular[data.dates[i]][group]['total_weight'] * multiplier * 100) / 100) + '</td>';
+                html += '<td class="text-right">' + numberWithCommas(Math.round(data.tabular[data.dates[i]][group]['max_weight'] * multiplier * 100) / 100) + '</td>';
+                html += '<td class="text-right">' + numberWithCommas(Math.round(data.tabular[data.dates[i]][group]['avg_weight'] * multiplier * 100) / 100) + '</td>';
                 html += '<td class="text-right"><a class="expand_strength" id="' +  dates[i] + '_' + group_escaped + '" data-date="' + dates[i] + '" data-group="' + group + '"><i class="fas fa-plus"></i></a></td>';
                 html += '</tr>';
 
@@ -1335,6 +1374,15 @@ function display_summary(start_date, end_date){
 
     html += '</tr></table></div>';
     $("#details").html(html);
+}
+
+function convert_weights(){
+    fields = $(".weight_field")
+
+    fields.each(function(index){
+        kgs = $(this).val();
+        $(this).val(Math.round(kgs * 2.2 * 100)/ 100);
+    });
 }
 
 var myChart = summary_chart(ctx, myChart);

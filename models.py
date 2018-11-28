@@ -149,6 +149,7 @@ class UserProfile(models.Model):
     daily_target = models.IntegerField(default=30)
     height = models.FloatField(default=177)
     units = models.CharField(max_length=5, choices=(("cm", "cm"), ("in", "in")), default="cm")
+    unit_type = models.CharField(max_length=10, choices=(("metric", "metric"), ("imp", "imperial")), default="metric")
     age = models.IntegerField(default=40)
     birthdate = models.DateField(null=True, blank=True)
 

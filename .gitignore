@@ -16,3 +16,4 @@ tests/.coverage
 tests/report/
 workout/settings.py
 .idea/
+migrations/*

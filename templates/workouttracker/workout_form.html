@@ -58,7 +58,7 @@
                     <label for="reps">Reps:</label>
                 </div>
                 <div class="col-sm-2 strength_field">
-                    <label for="weight">Weight (kg):</label>
+                    <label for="weight">Weight ({% if profile.unit_type == 'imp' %}lbs{% else %}kg{% endif %}):</label>
                 </div>
                 <div class="col-sm-2">
                     <label for="intensity">Intensity:</label>
@@ -67,7 +67,7 @@
                     <label for="duration">Duration:</label>
                 </div>
                 <div class="col-sm-2 walk_field">
-                    <label for="distance">Distance (km):</label>
+                    <label for="distance">Distance ({% if profile.unit_type == 'imp' %}mi{% else %}km{% endif %}):</label>
                 </div>
                 <div class="col-sm-1">
                     <label for="delete">Delete:</label>
@@ -129,6 +129,11 @@
         {% if workout.id or edit %}
             $("#id_summary-type").trigger("change");
             $("#id_summary-time").val("{{time}}");
+
+            // handle the conversion from metric if neccessary
+            {% if profile.unit_type == "imp" %}
+                convert_weights();
+            {% endif %}
         {% endif %}
         {% if workout.group_id %}
             // $("#id_summary-group").trigger("change");
