@@ -596,6 +596,10 @@ def HistoryByExercise(request, pk):
 
 def ExercisesPerformed(request):
     start_date, end_date = get_dates_from_request(request, offset=30)
+
+    # add one to the end date for inclusive
+    end_date += datetime.timedelta(days=1)
+
     user = request.user
     workouts = WorkoutDetail.objects.filter(workout__user=user).filter(workout__start__gte=start_date).filter(workout__start__lte=end_date)
 
