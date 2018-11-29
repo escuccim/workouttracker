@@ -65,7 +65,7 @@ def Index(request):
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
     groups = MuscleGroup.objects.filter(type_id=2).filter(parent_id=None).all()
 
-    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile, 'profile':  profile })
+    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile, 'profile':  profile})
 
 def ChartData(request):
     user = request.user
@@ -532,3 +532,80 @@ def ExportData(request):
 
     else:
         return JsonResponse({'status': 'error'})
+
+def HistoryByExercise(request, pk):
+    start_date, end_date = get_dates_from_request(request, offset=30)
+
+    # add one to the end date for inclusive
+    end_date += datetime.timedelta(days=1)
+
+    user = request.user
+    workouts = WorkoutDetail.objects.filter(workout__user=user).filter(workout__start__gte=start_date).filter(workout__start__lte=end_date).filter(exercise_id=pk)
+
+    # create our list of dates within the range
+    dates = []
+    current_date = start_date
+    while (current_date < end_date):
+        date = str(current_date.year) + "-" + str(current_date.month).zfill(2) + "-" + str(current_date.day).zfill(2)
+        dates.append(date)
+        current_date = (current_date + datetime.timedelta(days=1))
+
+    # create a dict of workouts for that exercise
+    workout_dict = {}
+    for workout in workouts:
+        date_str = date_to_string(workout.workout.start)
+
+        dict = model_to_dict(workout)
+
+        if date_str in workout_dict:
+            workout_dict[date_str]['reps'] += workout.reps
+            workout_dict[date_str]['sets'] += workout.sets
+            workout_dict[date_str]['weight'] += workout.weight
+            workout_dict[date_str]['total_weight'] += (workout.weight * workout.reps * workout.sets)
+            workout_dict[date_str]['count'] += 1
+            if workout.weight > workout_dict[date_str]['max_weight']:
+                workout_dict[date_str]['max_weight'] = workout.weight
+        else:
+            workout_dict[date_str] = {'reps': workout.reps, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
+
+    sets = []
+    reps = []
+    total_weights = []
+    counts = []
+    max_weights = []
+    avg_weights = []
+    # convert to lists by date
+    for date in dates:
+        if date in workout_dict:
+            sets.append(workout_dict[date]['sets'])
+            reps.append(workout_dict[date]['reps'])
+            total_weights.append(workout_dict[date]['total_weight'])
+            counts.append(workout_dict[date]['count'])
+            max_weights.append(workout_dict[date]['max_weight'])
+            avg_weights.append(workout_dict[date]['weight'] / (workout_dict[date]['count']))
+        else:
+            sets.append(None)
+            reps.append(None)
+            total_weights.append(None)
+            counts.append(None)
+            max_weights.append(None)
+            avg_weights.append(None)
+
+    return JsonResponse({'dates': dates, 'exercises': workout_dict, 'sets': sets, 'reps': reps, 'avg_weights': avg_weights,  'total_weights': total_weights, 'counts': counts, 'max_weights': max_weights, 'units': user.workout_user.unit_type}, safe=False)
+
+
+def ExercisesPerformed(request):
+    start_date, end_date = get_dates_from_request(request, offset=30)
+    user = request.user
+    workouts = WorkoutDetail.objects.filter(workout__user=user).filter(workout__start__gte=start_date).filter(workout__start__lte=end_date)
+
+    exercises = []
+    for workout in workouts:
+        tuple = (workout.exercise.name, workout.exercise.id)
+
+        if tuple not in exercises:
+            exercises.append(tuple)
+
+    exercises.sort()
+
+    return JsonResponse({'exercises': exercises})

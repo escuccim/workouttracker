@@ -45,6 +45,7 @@
                                 <!--<option value="totals">Workout Summary</option>-->
                                 <option value="details">Workout Details</option>
                                 <option value="strength">Strength Training</option>
+                                <option value="by_exercise">History by Exercise</option>
                                 <option value="weight">Weight History</option>
                             </select>
                         </div>
@@ -74,6 +75,27 @@
                     <label class="control-label col-sm-1">By:</label>
                     <div class="col-sm-4">
                         <select name="group" id="strength-unit-group" class="form-control">
+                            <option value="weight">Weight</option>
+                            <option value="reps">Sets/Reps</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row exercise_selection" style="display: none;">
+        <div class="col-sm-12">
+            <form class="form form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-sm-2">Select Exercise:</label>
+                    <div class="col-sm-4">
+                        <select name="group" id="select_exercise" class="form-control">
+                        </select>
+                    </div>
+                    <label class="control-label col-sm-1">By:</label>
+                    <div class="col-sm-4">
+                        <select name="group" id="exercise_history_by" class="form-control">
                             <option value="weight">Weight</option>
                             <option value="reps">Sets/Reps</option>
                         </select>

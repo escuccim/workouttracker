@@ -10,6 +10,7 @@ $("#controller").on("submit", function(e){
     $("#charts").show();
     $("#details").hide();
     $(".strength-drill-down").hide();
+    $("#exercise_selection").hide();
 
     if(chart == "summary"){
         summary_chart(ctx, myChart, start_date, end_date);
@@ -26,6 +27,10 @@ $("#controller").on("submit", function(e){
         $(".strength-drill-down").show();
         $("#strength-group").val("");
         strength_chart(ctx, myChart, start_date, end_date);
+    } else if(chart == "by_exercise"){
+        populate_exercise_list();
+        $(".exercise_selection").show();
+        history_by_exercise_chart(ctx, myChart, start_date, end_date);
     }
 });
 
@@ -46,6 +51,21 @@ $(document).on("click", ".export_data", function(e){
     }
 
     $("#WaitModalBody").html(html);
+});
+
+$(document).on("change", "#select_exercise", function(e){
+    start_date = $("#start_date").val();
+    end_date = $("#end_date").val();
+
+    history_by_exercise_chart(ctx, myChart, start_date, end_date);
+});
+
+$(document).on("change", "#exercise_history_by", function(e){
+    by = $(this).val();
+    start_date = $("#start_date").val();
+    end_date = $("#end_date").val();
+
+    history_by_exercise_chart(ctx, myChart, start_date, end_date, by=by);
 });
 
 $(document).on("click", ".expand_strength", function(e){
@@ -907,6 +927,165 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
     return myChart;
 }
 
+function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weight"){
+    exercise = $("#select_exercise").val()
+    console.log(by);
+    url = "api/history_by_exercise/" + exercise + "?foo";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+    console.log(data);
+    try {
+        ctx = clearChart();
+    } catch(err) {
+        console.log(err);
+    }
+
+    if(data.units == "imp"){
+        label_str = "lbs";
+    } else {
+        label_str = "kg";
+    }
+
+    if(by == "weight"){
+        console.log("By weight");
+        datasets = []
+        datasets.push({
+                    label: 'Total Weight Moved',
+                    data: data.total_weights,
+                    yAxisID: 'A',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(50, 120, 255, 0.2)',
+                    borderColor: 'rgba(50, 120, 255, 0.5)',
+                });
+
+        datasets.push({
+                    label: 'Average Weight',
+                    data: data.avg_weights,
+                    yAxisID: 'B',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(120, 120, 255, 0.3)',
+                    borderColor: 'rgba(120, 120, 255, 0.5)',
+                });
+
+        datasets.push({
+                    label: 'Max Weight',
+                    data: data.max_weights,
+                    yAxisID: 'B',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(175, 20, 50, 0.1)',
+                    borderColor: 'rgba(225, 20, 50, 0.5)',
+                });
+
+        scales = {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'right',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Total Weight Moved ('+label_str +')',
+                }
+              }, {
+                id: 'B',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Weight ('+label_str +')',
+                }
+              }]
+            };
+        callbacks = {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' ' + label_str;
+                    }
+                };
+    } else{
+        datasets = []
+         datasets.push({
+                    label: 'Total Sets',
+                    data: data.sets,
+                    yAxisID: 'A',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(50, 120, 255, 0.2)',
+                    borderColor: 'rgba(50, 120, 255, 0.5)',
+                });
+
+        datasets.push({
+                    label: 'Total Reps',
+                    data: data.reps,
+                    yAxisID: 'B',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(175, 20, 50, 0.1)',
+                    borderColor: 'rgba(225, 20, 50, 0.5)',
+                });
+
+        scales = {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Total Reps',
+                }
+              },  {
+                id: 'B',
+                type: 'linear',
+                position: 'right',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Total Sets',
+                }
+              }]
+            }
+        callbacks = {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel;
+                    }
+                };
+    }
+
+    console.log(datasets);
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.dates,
+            datasets: datasets,
+        },
+        options: {
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: callbacks,
+            },
+            spanGaps: true,
+            scales: scales,
+        }
+    });
+
+//    strength_detail(data);
+
+    return myChart;
+}
+
 function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="weight"){
     url = "api/strength_data?group=" + group;
     if(start_date != undefined){
@@ -1393,6 +1572,25 @@ function convert_weights(){
         kgs = $(this).val();
         $(this).val(Math.round(kgs * 2.2 * 100)/ 100);
     });
+}
+
+function populate_exercise_list(){
+    url = "api/exercises_performed"
+    data = get_chart_data(url);
+
+    // get the current selection
+    val = $("#select_exercise").val();
+
+    // empty the list
+    $("#select_exercise").empty();
+
+    // repopulate the list
+    for(var i=0; i<data.exercises.length; i++){
+        $("#select_exercise").append('<option value="' + data.exercises[i][1] + '">'+ data.exercises[i][0] + '</option>');
+    }
+
+    if(val != null)
+        $("#select_exercise").val(val);
 }
 
 var myChart = summary_chart(ctx, myChart);
