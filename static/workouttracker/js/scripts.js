@@ -54,10 +54,11 @@ $(document).on("click", ".export_data", function(e){
 });
 
 $(document).on("change", "#select_exercise", function(e){
+    by = $("#exercise_history_by").val();
     start_date = $("#start_date").val();
     end_date = $("#end_date").val();
 
-    history_by_exercise_chart(ctx, myChart, start_date, end_date);
+    history_by_exercise_chart(ctx, myChart, start_date, end_date, by);
 });
 
 $(document).on("change", "#exercise_history_by", function(e){
