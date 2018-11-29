@@ -414,12 +414,13 @@ def EditProfile(request):
         if profile_form.is_valid() and user_form.is_valid():
             user_form.save()
 
-            if not new_user:
-                profile_form.save()
-            else:
-                profile = profile_form.save(commit=False)
-                profile.user = user
-                profile.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+
+            if profile.unit_type == "imp":
+                profile.height *= 2.54
+
+            profile.save()
 
             return JsonResponse({'success': True})
 
@@ -431,6 +432,9 @@ def EditProfile(request):
 
         # handle the case if the user does not have an existing profile
         try:
+            if user.workout_user.unit_type == "imp":
+                user.workout_user.height = user.workout_user.height / 2.54
+
             profile_form = UserProfileForm(instance=user.workout_user, prefix="profile")
             msg = None
         except:
@@ -438,7 +442,7 @@ def EditProfile(request):
             msg = "Your gender, height, and age are required to calculate the calories burned during exercises. Please fill out this form."
 
 
-    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'msg': msg})
+    return render(request, 'workouttracker/profileForm.html', {'profile_form': profile_form, 'user_form': user_form, 'msg': msg, 'user': user })
 
 def ExerciseByType(request, type):
     if type is not 0 and type is not 4:

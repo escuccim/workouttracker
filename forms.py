@@ -57,10 +57,11 @@ class WorkoutSummaryForm(BootstrapModelForm):
 class UserProfileForm(BootstrapModelForm):
     class Meta:
         model = UserProfile
-        fields = ['gender', 'height', 'birthdate', 'unit_type']
+        fields = ['gender', 'birthdate', 'unit_type', 'height']
 
         widgets = {
             'birthdate': forms.DateInput(attrs={'type': 'date', 'required': 'true'}),
+            'height': forms.NumberInput(attrs={'min': 120, 'max': 213})
         }
 
         labels = {

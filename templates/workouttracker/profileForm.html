@@ -40,4 +40,27 @@
        </div>
     </div>
 </form>
+
+<script>
+    {% if user.workout_user.unit_type == "imp" %}
+        // update the range on the height input
+        $("#id_profile-height").attr("min", 48);
+        $("#id_profile-height").attr("max", 96);
+    {% endif %}
+
+    $("#id_profile-unit_type").on("change", function(e){
+        units = $(this).val();
+        if(units == "imp"){
+            // update the label
+            $("#profile_height_units").html("(in)");
+            // update the range
+            $("#id_profile-height").attr("min", 48);
+            $("#id_profile-height").attr("max", 96);
+        } else {
+            $("#profile_height_units").html("(cm)");
+            $("#id_profile-height").attr("min", 120);
+            $("#id_profile-height").attr("max", 213);
+        }
+    });
+</script>
 {% endblock %}
