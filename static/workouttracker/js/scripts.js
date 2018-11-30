@@ -938,7 +938,7 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
 
 function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weight"){
     exercise = $("#select_exercise").val()
-    console.log(by);
+
     url = "api/history_by_exercise/" + exercise + "?foo";
     if(start_date != undefined){
         url += "&start=" + start_date;
@@ -947,7 +947,7 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
         url += "&end=" + end_date;
     }
     data = get_chart_data(url);
-    console.log(data);
+
     try {
         ctx = clearChart();
     } catch(err) {
@@ -961,7 +961,6 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
     }
 
     if(by == "weight"){
-        console.log("By weight");
         datasets = []
         datasets.push({
                     label: 'Total Weight Moved',
@@ -1072,7 +1071,6 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
                 };
     }
 
-    console.log(datasets);
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
