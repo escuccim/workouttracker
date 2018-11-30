@@ -1562,24 +1562,24 @@ function display_summary(start_date, end_date){
             totals[group] += data.data[group]['minutes'][i];
 
             if(data.data[group]['minutes'][i] != 0){
-                html += '<td>' + data.data[group]['minutes'][i] + ' min</td>';
+                html += '<td>' + data.data[group]['minutes'][i] + '</td>';
             } else {
                 html += '<td> - </td>';
             }
         }
-        html += '<td>' + day_total + ' min</td>';
+        html += '<td>' + day_total + '</td>';
         html += '</tr>';
     }
 
     html += '<tr class="total_row"><td><b>Total:</b></td>';
     // display the totals per group
     for(var i=0; i<data.groups.length;i++){
-        html += '<td>' + totals[data.groups[i]] + ' min</td>';
+        html += '<td>' + totals[data.groups[i]] + '</td>';
 
         // while we are looping through groups also create a struct to hold the weekly totals
         totals[data.groups[i]] = 0;
     }
-    html += '<td>' + numberWithCommas(totals['total']) + ' min</td>';
+    html += '<td>' + numberWithCommas(totals['total']) + '</td>';
 
     html += '</tr></table></div>';
     $("#details").html(html);
