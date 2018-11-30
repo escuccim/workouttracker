@@ -693,11 +693,12 @@ function summary_text(start_date, end_date){
 
     total_total_min = 0;
     total_total_kcal = 0;
-
-    for(group in data){
-        count = data[group]['calories'].length;
-        total_kcal = data[group]['calories'].reduce(add, 0);
-        total_min = data[group]['minutes'].reduce(add, 0);
+    workouts = data.workouts
+    count = data.days;
+    
+    for(group in workouts){
+        total_kcal = workouts[group]['calories'].reduce(add, 0);
+        total_min = workouts[group]['minutes'].reduce(add, 0);
 
         total_total_kcal += total_kcal;
         total_total_min += total_min;

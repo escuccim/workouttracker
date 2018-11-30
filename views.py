@@ -99,10 +99,11 @@ def ChartSummary(request):
     user = request.user
     # get our start and end dates from URL or default to one week up to and including today
     start_date, end_date = get_dates_from_request(request)
+    days = (end_date - start_date).days
 
     workouts = WorkoutSummary.summary_breakdown(user, start_date=start_date, end_date=end_date)
 
-    return JsonResponse(workouts)
+    return JsonResponse({'workouts':workouts, 'days': days})
 
 def ExerciseBreakdown(request):
     user = request.user
