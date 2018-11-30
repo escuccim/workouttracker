@@ -11,24 +11,26 @@
                 <div class="panel panel-default">
 
                     <div class="row" style="padding: 5px;">
-                        <div class="col-sm-1"></div>
-                        <label class="control-label col-sm-1" for="start_date">Start:</label>
-                        <div class="col-sm-3">
-                            <input class="form-control" id="start_date" name="start_date" type="date" value="{{ start_date }}">
-                        </div>
-
-                        <label class="control-label col-sm-1" for="end_date">End:</label>
-                        <div class="col-sm-3">
-                            <input class="form-control" id="end_date" name="end_date" type="date" value="{{ end_date }}">
-                        </div>
-
-
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 col-md-push-9">
                             <a class="add_workout" title="Add workout"><i class="fas fa-plus-circle big"></i></a>
                             <a class="add_weight" title="Add weight"><i class="fas fa-weight big"></i></a>
                             <a class="edit_profile" title="Add weight"><i class="fas fa-user-circle big"></i></a>
                             <a class="export_data" title="Export Data"><i class="fas fa-file-export big"></i></a>
                         </div>
+
+                        <div class="col-sm-1 col-md-pull-4"></div>
+                        <label class="control-label col-sm-1 col-md-pull-3" for="start_date">Start:</label>
+                        <div class="col-sm-3 col-md-pull-3">
+                            <input class="form-control" id="start_date" name="start_date" type="date" value="{{ start_date }}">
+                        </div>
+
+                        <label class="control-label col-sm-1 col-md-pull-3" for="end_date">End:</label>
+                        <div class="col-sm-3 col-md-pull-3">
+                            <input class="form-control" id="end_date" name="end_date" type="date" value="{{ end_date }}">
+                        </div>
+
+
+
 
                     </div>
                     <div class="row" style="padding: 5px;">
