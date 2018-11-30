@@ -1,5 +1,8 @@
 var intensities = ['Very Low', 'Low', 'Moderate', 'High']
 
+// populate the list of exercises performed
+populate_exercise_list();
+
 $("#controller").on("submit", function(e){
     e.preventDefault();
     start_date = $("#start_date").val();
@@ -28,7 +31,6 @@ $("#controller").on("submit", function(e){
         $("#strength-group").val("");
         strength_chart(ctx, myChart, start_date, end_date);
     } else if(chart == "by_exercise"){
-        populate_exercise_list();
         $(".exercise_selection").show();
         history_by_exercise_chart(ctx, myChart, start_date, end_date);
     }
@@ -442,6 +444,9 @@ $(document).on("submit", "#add_workout_form", function(e){
                     $("#ModalBody").html(html);
                     // update the field to indicate that the form has been saved
                     $("#saved").val(1);
+
+                    // populate the list of exercises performed
+                    populate_exercise_list();
                  }
                  // else display errors
                  else {
@@ -468,6 +473,9 @@ $(document).on("submit", "#edit_workout_form", function(e){
                     $("#ModalBody").html(html);
                     // update the field to indicate that the form has been saved
                     $("#saved").val(1);
+
+                    // populate the list of exercises performed
+                    populate_exercise_list();
                  }
                  // else display errors
                  else {
