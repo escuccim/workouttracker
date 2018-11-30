@@ -200,10 +200,9 @@ $(document).on("change", "#id_summary-type", function(e){
     data = get_chart_data(url);
 
     populate_exercise_list(data);
-    console.log(val);
+
     $(".exercise_detail_form").show();
     if(val == 2){
-        console.log("Hi!");
         $(".strength_field").show();
         $(".walk_field").hide();
     } else if (val == 5){
@@ -277,6 +276,7 @@ $(document).on("click", "#delete-yes", function(e){
     data = get_chart_data(url);
     if(data.success == true){
         $("#controller").trigger("submit");
+        $(".modal").modal("hide");
     } else {
         console.log("Error!");
     }
