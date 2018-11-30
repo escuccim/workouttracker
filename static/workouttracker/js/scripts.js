@@ -13,7 +13,7 @@ $("#controller").on("submit", function(e){
     $("#charts").show();
     $("#details").hide();
     $(".strength-drill-down").hide();
-    $("#exercise_selection").hide();
+    $(".exercise_selection").hide();
 
     if(chart == "summary"){
         summary_chart(ctx, myChart, start_date, end_date);
