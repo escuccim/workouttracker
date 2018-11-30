@@ -1,7 +1,7 @@
 var intensities = ['Very Low', 'Low', 'Moderate', 'High']
 
 // populate the list of exercises performed
-populate_exercise_list();
+populate_exercise_list_2();
 
 $("#controller").on("submit", function(e){
     e.preventDefault();
@@ -200,9 +200,10 @@ $(document).on("change", "#id_summary-type", function(e){
     data = get_chart_data(url);
 
     populate_exercise_list(data);
-
+    console.log(val);
     $(".exercise_detail_form").show();
     if(val == 2){
+        console.log("Hi!");
         $(".strength_field").show();
         $(".walk_field").hide();
     } else if (val == 5){
@@ -446,7 +447,7 @@ $(document).on("submit", "#add_workout_form", function(e){
                     $("#saved").val(1);
 
                     // populate the list of exercises performed
-                    populate_exercise_list();
+                    populate_exercise_list_2();
                  }
                  // else display errors
                  else {
@@ -475,7 +476,7 @@ $(document).on("submit", "#edit_workout_form", function(e){
                     $("#saved").val(1);
 
                     // populate the list of exercises performed
-                    populate_exercise_list();
+                    populate_exercise_list_2();
                  }
                  // else display errors
                  else {
@@ -1581,7 +1582,7 @@ function convert_weights(){
     });
 }
 
-function populate_exercise_list(){
+function populate_exercise_list_2(){
     url = "api/exercises_performed"
     data = get_chart_data(url);
 
