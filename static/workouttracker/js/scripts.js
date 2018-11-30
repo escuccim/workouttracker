@@ -652,7 +652,7 @@ function clearChart() {
     var parent = document.getElementById('summary_chart');
     var child = document.getElementById('myChart');
     parent.removeChild(child);
-    parent.innerHTML ='<canvas id="myChart" width="400" height="150"></canvas>';
+    parent.innerHTML ='<canvas id="myChart" width="400" height="200"></canvas>';
     ctx = document.getElementById("myChart").getContext('2d');
     return ctx;
 }
@@ -760,6 +760,8 @@ function summary_chart(ctx, myChart, start_date, end_date){
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
               yAxes: [ {
                 id: 'A',
@@ -922,6 +924,8 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
             datasets: datasets,
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             tooltips: {
                 enabled: true,
                 mode: 'single',
@@ -1079,6 +1083,8 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
             datasets: datasets,
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             tooltips: {
                 enabled: true,
                 mode: 'single',
@@ -1213,6 +1219,8 @@ function strength_detail_chart(ctx, myChart, start_date, end_date, group, by="we
             datasets: datasets,
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             spanGaps: true,
             tooltips: {
                 enabled: true,
@@ -1313,6 +1321,8 @@ function breakdown_chart(ctx, myChart, start_date, end_date){
             datasets: datasets,
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             tooltips: {
                 enabled: true,
                 mode: 'single',
@@ -1426,6 +1436,8 @@ function weight_chart(ctx, myChart, start_date, end_date){
             datasets: datasets
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
               yAxes: yAxes,
             }

@@ -34,8 +34,8 @@
                     <div class="row" style="padding: 5px;">
                         <div class="col-sm-1"></div>
                         <!--<div class="col-sm-2 text-center"><button type="button" data-val="7" id="week_button" class="btn btn-secondary btn-block date-filter-button">Week</button></div>-->
-                        <div class="col-sm-2 text-center"><button type="button" data-val="30" id="month_button" class="btn btn-success btn-block active date-filter-button">Month</button></div>
-                        <div class="col-sm-2 text-center"><button type="button" data-val="365" id="year_button" class="btn btn-secondary btn-block date-filter-button">Year</button></div>
+                        <div class="col-sm-2 text-center hidden-sm hidden-xs"><button type="button" data-val="30" id="month_button" class="btn btn-success btn-block active date-filter-button">Month</button></div>
+                        <div class="col-sm-2 text-center hidden-sm hidden-xs"><button type="button" data-val="365" id="year_button" class="btn btn-secondary btn-block date-filter-button">Year</button></div>
 
                         <label class="control-label col-sm-1" for="chart">View:</label>
                         <div class="col-sm-3">
@@ -105,10 +105,10 @@
         </div>
     </div>
 
-    <div class="row" id="charts" style="display: block;">
-        <div class="col-md-12">
-            <div id="summary_chart" style="display: block;">
-                <canvas id="myChart" width="400" height="150"></canvas>
+    <div class="row chart_container" id="charts" style="display: block;">
+        <div class="col-md-12 chart_container">
+            <div id="summary_chart" class="chart_container" style="display: block;">
+                <canvas id="myChart" class="chart_container" width="400" height="250"></canvas>
             </div>
         </div>
     </div>
