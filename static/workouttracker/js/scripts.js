@@ -695,7 +695,7 @@ function summary_text(start_date, end_date){
     total_total_kcal = 0;
     workouts = data.workouts
     count = data.days;
-    
+
     for(group in workouts){
         total_kcal = workouts[group]['calories'].reduce(add, 0);
         total_min = workouts[group]['minutes'].reduce(add, 0);
@@ -1250,7 +1250,7 @@ function strength_detail(data){
         multiplier = 1;
     }
 
-    html = '<div class="col-sm-12"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight ('+label_str+')</th><th class="text-right">Max Weight ('+label_str+')</th><th class="text-right">Avg Weight ('+label_str+')</th><th></th></tr></thead>';
+    html = '<div class="col-sm-12 table-responsive"><table class="table"><thead><tr><th>Date</th><th>Group</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Total Weight ('+label_str+')</th><th class="text-right">Max Weight ('+label_str+')</th><th class="text-right">Avg Weight ('+label_str+')</th><th></th></tr></thead>';
     dates = data.dates.reverse();
     for(var i=0; i < dates.length; i++){
         if(data.tabular[dates[i]]){
@@ -1489,8 +1489,8 @@ function update_details(start_date, end_date){
     html = '<div class="col-md-12"><div class="panel-group" id="accordion">';
     // create our new HTML
     for(var i=0; i<data.dates.length; i++){
-        html += '<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#'+data.dates[i] + '"><div class="row"><div class="col-sm-2">' + data.dates[i] + '</div><div class="col-sm-2">';
-        html += data.summaries.minutes[i] + ' mins </div><div class="col-sm-2">';
+        html += '<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#'+data.dates[i] + '"><div class="row"><div class="col-xs-5 col-md-2">' + data.dates[i] + '</div><div class="col-xs-3 col-md-2">';
+        html += data.summaries.minutes[i] + ' mins </div><div class="col-xs-3 col-md-3">';
         html += data.summaries.calories[i] + ' kCal </div></div></a></h4>';
         html += '</div>';
 
@@ -1536,7 +1536,7 @@ function display_summary(start_date, end_date){
     data = get_chart_data(url);
 
     // create our table and headers
-    html = '<div class="col-md-12"><table class="table table-striped">';
+    html = '<div class="col-md-12 table-responsive"><table class="table table-striped w-auto">';
     html += '<thead><tr><th>Date</th>';
     totals = {}
     for(var i=0; i<data.groups.length;i++){
