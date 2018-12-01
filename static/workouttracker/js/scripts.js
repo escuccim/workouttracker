@@ -1056,7 +1056,7 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Total Reps',
+                    labelString: 'Total Sets',
                 }
               },  {
                 id: 'B',
@@ -1067,7 +1067,7 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
                 },
                 scaleLabel: {
                     display: true,
-                    labelString: 'Total Sets',
+                    labelString: 'Total Reps',
                 }
               }]
             }
