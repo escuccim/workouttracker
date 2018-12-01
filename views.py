@@ -458,7 +458,7 @@ def ExerciseByType(request, type):
     return JsonResponse(list(exercises), safe=False)
 
 def ExerciseByGroup(request, type, group):
-    exercises = Exercise.objects.filter(type_id=type).filter(main_group_id=group).all().values()
+    exercises = Exercise.objects.filter(type_id=type).filter(group=group).all().values()
 
     return JsonResponse(list(exercises), safe=False)
 
