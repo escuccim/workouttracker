@@ -23,6 +23,13 @@ def calories_burned_walking(summary):
         kmh = distance / summary.duration
         mps = kmh / 3.6
 
+        # handle case with zero weight
+        if weight.weight == 0:
+            if user.gender == "M":
+                weight.weight = 85
+            else:
+                weight.weight = 70
+
         calories_burned = (0.035 * weight.weight) + ((mps ** 2) / user.height) * (0.029) * (weight.weight)
     else:
         calories_burned = calories_by_mets(summary)
@@ -48,6 +55,13 @@ def calories_burned_strength(summary):
         hr_for_intensity = summary.avg_heartrate
 
     weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
+
+    # handle case with zero weight
+    if weight.weight == 0:
+        if user.gender == "M":
+            weight.weight = 85
+        else:
+            weight.weight = 70
 
     if user.gender == "M":
         calories_burned = ( (user.age * .2017) - (weight.weight * 0.09036) + (hr_for_intensity * 0.6309) - 55.0969 ) * summary.duration / 4.184
@@ -75,6 +89,13 @@ def calories_burned_cardio(summary):
         hr_for_intensity = summary.avg_heartrate
 
     weight = WeightHistory.objects.filter(user_id=summary.user_id).last()
+
+    # handle case with zero weight
+    if weight.weight == 0:
+        if user.gender == "M":
+            weight.weight = 85
+        else:
+            weight.weight = 70
 
     if user.gender == "M":
         calories_burned = ((-55.0969 + (0.6309 * hr_for_intensity) + (0.1988 * weight.weight) + (0.2017 * user.age))/4.184) * summary.duration

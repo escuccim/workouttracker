@@ -376,9 +376,12 @@ def AddWeight(request):
         if units == "imp":
             weight.weight = float(new_weight) / 2.2
             weight.units = "kg"
+        else:
+            weight.weight = new_weight
 
         if bodyfat:
             weight.bodyfat = bodyfat
+
         # we may want to use the previous body fat here to keep the chart looking nice
         else:
             pass
