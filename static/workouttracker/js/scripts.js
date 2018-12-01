@@ -8,6 +8,7 @@ $("#controller").on("submit", function(e){
     start_date = $("#start_date").val();
     end_date = $("#end_date").val();
 
+    populate_exercise_list_2();
     chart = $("#chart").val();
 
     $("#charts").show();
@@ -1596,7 +1597,10 @@ function convert_weights(){
 }
 
 function populate_exercise_list_2(){
-    url = "api/exercises_performed"
+    start_date = $("#start_date").val();
+    end_date = $("#end_date").val();
+
+    url = "api/exercises_performed?start=" + start_date + "&end=" + end_date;
     data = get_chart_data(url);
 
     // get the current selection
