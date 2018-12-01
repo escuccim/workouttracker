@@ -25,7 +25,7 @@ def get_dates_from_request(request, offset=15):
     end_date = request.GET.get('end', None)
 
     if start_date == None:
-        start_date = (datetime.datetime.now()).replace(day=1).date()
+        start_date = (datetime.datetime.now() - datetime.timedelta(days=30)).date()
     else:
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
 
