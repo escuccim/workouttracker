@@ -222,6 +222,7 @@ class MuscleGroup(models.Model):
     parent = models.ForeignKey("MuscleGroup", on_delete=models.DO_NOTHING, blank=True, null=True)
     area = models.ForeignKey(BodyAreas, on_delete=models.DO_NOTHING, blank=True, null=True)
     type = models.ForeignKey("ExerciseType", on_delete=models.DO_NOTHING, blank=True, null=True)
+    display_in_list = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name

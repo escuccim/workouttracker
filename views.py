@@ -13,6 +13,7 @@ from .models import WorkoutSummary, MuscleGroup, WorkoutDetail, WeightHistory, E
 from .forms import WorkoutSummaryForm, ExerciseFormSet, UserProfileForm, UserForm, PasswordForm
 import os
 import csv
+from django.db.models import Q
 
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
@@ -63,7 +64,7 @@ def Index(request):
 
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
-    groups = MuscleGroup.objects.filter(type_id=2).filter(parent_id=None).all()
+    groups = MuscleGroup.objects.filter(type_id=2).filter(display_in_list=1).all()
 
     return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile, 'profile':  profile})
 
@@ -119,13 +120,12 @@ def ExerciseBreakdown(request):
     dates.append(date)
 
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
-    major_groups = MuscleGroup.objects.filter(parent_id=None).exclude(id=24).order_by("area__order", "name")
+    major_groups = MuscleGroup.objects.filter(display_in_list=1).exclude(id=24).order_by("area__order", "name")
 
     # make a list of all the major muscle groups
     muscle_groups = []
     data_dict = {}
     for group in major_groups:
-        muscle_groups.append(group.name)
         data_dict[group.name] = {'minutes': [], 'calories': [], 'color': group.color, 'dates': []}
 
         for i, date in enumerate(dates):
@@ -134,6 +134,9 @@ def ExerciseBreakdown(request):
             if date_str in workouts:
                 for workout in workouts[date_str]:
                     if workout.group.name == group.name:
+                        if group.name not in muscle_groups:
+                            muscle_groups.append(group.name)
+
                         if date_str not in data_dict[group.name]['dates']:
                             data_dict[group.name]['minutes'].append(workout.duration)
                             data_dict[group.name]['calories'].append(workout.calories)
@@ -461,7 +464,7 @@ def ExerciseByGroup(request, type, group):
     if int(group) == 22:
         exercises = Exercise.objects.all().values()
     else:
-        exercises = Exercise.objects.filter(type_id=type).filter(group=group).all().values()
+        exercises = Exercise.objects.filter(Q(type_id=type) & (Q(group=group) | Q(main_group=group))).filter().all().distinct().values()
 
     return JsonResponse(list(exercises), safe=False)
 
