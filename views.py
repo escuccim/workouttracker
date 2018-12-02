@@ -458,7 +458,10 @@ def ExerciseByType(request, type):
     return JsonResponse(list(exercises), safe=False)
 
 def ExerciseByGroup(request, type, group):
-    exercises = Exercise.objects.filter(type_id=type).filter(group=group).all().values()
+    if int(group) == 22:
+        exercises = Exercise.objects.all().values()
+    else:
+        exercises = Exercise.objects.filter(type_id=type).filter(group=group).all().values()
 
     return JsonResponse(list(exercises), safe=False)
 
