@@ -42,7 +42,7 @@ class WorkoutSummaryForm(BootstrapModelForm):
 
     def __init__(self, *args, **kwargs):
         super(WorkoutSummaryForm, self).__init__(*args, **kwargs)
-        self.fields['group'].queryset = self.fields['group'].queryset.filter(parent_id=None)
+        self.fields['group'].queryset = self.fields['group'].queryset.filter(display_in_list=1)
 
     class Meta:
         model = WorkoutSummary
