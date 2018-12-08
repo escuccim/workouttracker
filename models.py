@@ -315,11 +315,19 @@ class WorkoutSummary(models.Model):
     notes = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        # if no duration was entered use the sum of the durations for the exercises
+        if self.duration == 0:
+            print("No duration!")
+            calculated_duration = 0
+            exercises = self.workoutdetail_set.all()
+            for exercise in exercises:
+                calculated_duration += exercise.duration
+
+            self.duration = calculated_duration
+
         # calculate the calories burned during this exercise sesssion
         self.calculated_calories = calories_by_mets(self)
-
-        if True:#self.calories == 0:
-            self.calories = self.calculated_calories
+        self.calories = self.calculated_calories
 
         # save the relationship as normal
         super(WorkoutSummary, self).save(*args, **kwargs)
