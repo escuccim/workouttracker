@@ -542,7 +542,6 @@ $(".date-filter-button").on("click", function(e){
         end_date = new Date();
         end_date_str = end_date.getFullYear() + '-' + (end_date.getMonth()+1).toString().padStart(2, '0') + '-' + end_date.getDate().toString().padStart(2, '0');
         $("#end_date").val(end_date_str);
-
     }
 
     start_date = new Date($("#end_date").val());
@@ -555,10 +554,10 @@ $(".date-filter-button").on("click", function(e){
     } else if(value == 365){
         date_string += '01-01';
     } else if(value == 30){
-        date_string += (start_date.getMonth()+1).toString().padStart(2, '0') + "-01";
+        date_string += (start_date.getMonth()).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
     }
 
-
+    console.log(date_string);
     $("#start_date").val(date_string);
     $("#controller").trigger("submit");
 });
