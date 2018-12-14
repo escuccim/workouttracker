@@ -568,7 +568,7 @@ def HistoryByExercise(request, pk):
         dict = model_to_dict(workout)
 
         if date_str in workout_dict:
-            workout_dict[date_str]['reps'] += workout.reps * workout.sets
+            workout_dict[date_str]['reps'] += (workout.reps * workout.sets)
             workout_dict[date_str]['sets'] += workout.sets
             workout_dict[date_str]['weight'] += workout.weight
             workout_dict[date_str]['total_weight'] += (workout.weight * workout.reps * workout.sets)
