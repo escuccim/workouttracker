@@ -148,6 +148,9 @@ $(".add_workout").on("click", function(e){
     $("#ModalLabel").html("Add Workout");
     $("#ModalBody").html(html);
     $("#Modal").modal("show");
+
+    // default the time to now
+    $(".time_now").trigger("click");
 });
 
 $(".add_weight").on("click", function(e){
