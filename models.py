@@ -254,6 +254,7 @@ class Exercise(models.Model):
     med_mets = models.FloatField(default=5)
     high_mets = models.FloatField(default=7)
     type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE, default=None, null=True)
+    approved = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name

@@ -79,6 +79,7 @@
                         {% if field.name == "exercise" %}
                             <div class="col-sm-3">
                                 {{ field }}
+                                <img src="/static/admin/img/icon-addlink.svg" alt="Add" class="add_exercise" data-target="{{ field.auto_id }}">
                             </div>
                         {% elif field.name == "intensity" %}
                              <div class="col-sm-2">

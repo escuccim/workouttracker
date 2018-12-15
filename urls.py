@@ -41,4 +41,5 @@ urlpatterns = [
     url(r'^api/delete_weight/(?P<pk>\d+)', views.DeleteWeight, name="delete_weight"),
     url(r'^api/history_by_exercise/(?P<pk>\d+)', views.HistoryByExercise, name="history_by_exercise"),
     url(r'^api/exercises_performed', views.ExercisesPerformed, name="exercises_by_date"),
+    url(r'^api/add_exercise', views.AddExercise, name="add_exercise"),
 ]

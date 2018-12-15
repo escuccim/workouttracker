@@ -65,8 +65,9 @@ def Index(request):
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
     groups = MuscleGroup.objects.filter(type_id=2).filter(display_in_list=1).all()
+    all_groups = MuscleGroup.objects.filter(display_in_list=1).all()
 
-    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile, 'profile':  profile})
+    return render(request, "workouttracker/index.html", {'user': user, 'workouts': workouts, 'dates': summaries['dates'], 'minutes': summaries['minutes'], 'calories': summaries['calories'], 'start_date': date_to_string(start_date), 'end_date': date_to_string(end_date), 'groups': groups, 'has_profile': has_profile, 'profile':  profile, 'all_groups': all_groups})
 
 def ChartData(request):
     user = request.user
@@ -453,9 +454,9 @@ def EditProfile(request):
 
 def ExerciseByType(request, type):
     if type is not 0 and type is not 4:
-        exercises = Exercise.objects.filter(type_id=type).all().values()
+        exercises = Exercise.objects.filter(approved=1).filter(type_id=type).all().values()
     else:
-        exercises = Exercise.objects.all().values()
+        exercises = Exercise.objects.filter(approved=1).all().values()
 
 
     return JsonResponse(list(exercises), safe=False)
@@ -464,7 +465,7 @@ def ExerciseByGroup(request, type, group):
     if int(group) == 22:
         exercises = Exercise.objects.all().values()
     else:
-        exercises = Exercise.objects.filter(Q(type_id=type) & (Q(group=group) | Q(main_group=group))).filter().all().distinct().values()
+        exercises = Exercise.objects.filter(Q(type_id=type) & Q(approved=1) & (Q(group=group) | Q(main_group=group))).filter().all().distinct().values()
 
     return JsonResponse(list(exercises), safe=False)
 
@@ -623,3 +624,23 @@ def ExercisesPerformed(request):
     exercises.sort()
 
     return JsonResponse({'exercises': exercises})
+
+def AddExercise(request):
+    if request.method == 'POST':
+        exercise = Exercise()
+        exercise.name = request.POST.get('name')
+        exercise.main_group_id = request.POST.get('main_group')
+        exercise.type_id = request.POST.get('type')
+        exercise.approved = 0
+
+        # override the mets for stretching exercises, the rest we'll leave at default
+        if exercise.type_id == 3:
+            exercise.low_mets = 3
+            exercise.med_mets = 4
+            exercise.high_mets = 5
+
+        exercise.save()
+
+        return JsonResponse({'success': True, 'exercise': model_to_dict(exercise)})
+    else:
+        return JsonResponse({'success': False})

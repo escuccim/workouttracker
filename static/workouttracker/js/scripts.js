@@ -142,6 +142,54 @@ $("#strength-group").on("change", function(e){
     }
 });
 
+$(document).on("click", ".add_exercise", function(e){
+    // get the id
+    id = $(this).data("target");
+    $("#target").val(id);
+
+    // fill in the type
+    $("#exercise_type").val($("#id_summary-type").val());
+
+    // preselect the group in the group dropdown
+    current_group = $("#id_summary-group").val();
+    $("#main_group").val(current_group);
+
+    // display the modal
+    $("#exerciseModal").modal("show");
+});
+
+$("#add_exercise_form").on("submit", function(e){
+    e.preventDefault();
+
+    // get the target so we know which field to select the new value from
+    target = $("#target").val();
+
+    // serialize and submit the form
+    $.ajax({
+            url     : $(this).attr('action'),
+            type    : $(this).attr('method'),
+            dataType: 'json',
+            data    : $(this).serialize(),
+            success : function( data ) {
+                 if(data.success == true){
+                    // add the new exercise to the lists at the bottom
+                    $(".exercise-list").append('<option value="' + data.exercise.id + '">'+ data.exercise.name + '</option>');
+
+                    // select the new exercise
+                    $("#" + target).val(data.exercise.id);
+
+                    // close the modal
+                    $("#exerciseModal").modal("hide");
+                 }
+            },
+            error   : function( xhr, err ) {
+                 console.log(err);
+            }
+        });
+
+
+});
+
 $(".add_workout").on("click", function(e){
     e.preventDefault();
     html = get_add_form();
