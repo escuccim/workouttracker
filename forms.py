@@ -24,6 +24,9 @@ class MuscleGroupForm(ModelForm):
 
 class WorkoutDetailForm(ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super(WorkoutDetailForm, self).__init__(*args, **kwargs)
+
     class Meta:
         model = WorkoutDetail
         fields = ['exercise', 'sets', 'reps', 'weight', 'intensity', 'duration', 'distance']
