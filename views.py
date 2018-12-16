@@ -454,9 +454,9 @@ def EditProfile(request):
 
 def ExerciseByType(request, type):
     if type is not 0 and type is not 4:
-        exercises = Exercise.objects.filter(approved=1).filter(type_id=type).all().values()
+        exercises = Exercise.objects.filter(Q(approved=1) | Q(approved=request.user.id)).filter(type_id=type).all().values()
     else:
-        exercises = Exercise.objects.filter(approved=1).all().values()
+        exercises = Exercise.objects.filter(Q(approved=1) | Q(approved=request.user.id)).all().values()
 
 
     return JsonResponse(list(exercises), safe=False)
@@ -465,7 +465,7 @@ def ExerciseByGroup(request, type, group):
     if int(group) == 22:
         exercises = Exercise.objects.all().values()
     else:
-        exercises = Exercise.objects.filter(Q(type_id=type) & Q(approved=1) & (Q(group=group) | Q(main_group=group))).filter().all().distinct().values()
+        exercises = Exercise.objects.filter(Q(type_id=type) & (Q(approved=1) | Q(approved=request.user.id)) & (Q(group=group) | Q(main_group=group))).filter().all().distinct().values()
 
     return JsonResponse(list(exercises), safe=False)
 
@@ -631,7 +631,7 @@ def AddExercise(request):
         exercise.name = request.POST.get('name')
         exercise.main_group_id = request.POST.get('main_group')
         exercise.type_id = request.POST.get('type')
-        exercise.approved = 0
+        exercise.approved = request.user.id
 
         # override the mets for stretching exercises, the rest we'll leave at default
         if exercise.type_id == 3:
