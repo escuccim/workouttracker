@@ -15,6 +15,9 @@ import os
 import csv
 from django.db.models import Q
 
+def one_rep_max(reps, weight):
+    return round(weight * (36 / (37 - reps)), 2)
+
 def date_to_string(date):
     return str(date.year) + "-" + str(date.month).zfill(2) + "-" + str(date.day).zfill(2)
 
@@ -576,8 +579,9 @@ def HistoryByExercise(request, pk):
             workout_dict[date_str]['count'] += 1
             if workout.weight > workout_dict[date_str]['max_weight']:
                 workout_dict[date_str]['max_weight'] = workout.weight
+                workout_dict[date_str]['max_reps'] = workout.reps
         else:
-            workout_dict[date_str] = {'reps': workout.reps, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
+            workout_dict[date_str] = {'reps': workout.reps, 'max_reps': workout.reps, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
 
     sets = []
     reps = []
@@ -585,6 +589,7 @@ def HistoryByExercise(request, pk):
     counts = []
     max_weights = []
     avg_weights = []
+    one_rep_maxes = []
     # convert to lists by date
     for date in dates:
         if date in workout_dict:
@@ -594,6 +599,7 @@ def HistoryByExercise(request, pk):
             counts.append(workout_dict[date]['count'])
             max_weights.append(workout_dict[date]['max_weight'])
             avg_weights.append(workout_dict[date]['weight'] / (workout_dict[date]['count']))
+            one_rep_maxes.append(one_rep_max(workout_dict[date]['max_reps'], workout_dict[date]['max_weight']))
         else:
             sets.append(None)
             reps.append(None)
@@ -601,8 +607,9 @@ def HistoryByExercise(request, pk):
             counts.append(None)
             max_weights.append(None)
             avg_weights.append(None)
+            one_rep_maxes.append(None)
 
-    return JsonResponse({'dates': dates, 'exercises': workout_dict, 'sets': sets, 'reps': reps, 'avg_weights': avg_weights,  'total_weights': total_weights, 'counts': counts, 'max_weights': max_weights, 'units': user.workout_user.unit_type}, safe=False)
+    return JsonResponse({'dates': dates, 'exercises': workout_dict, 'sets': sets, 'reps': reps, 'avg_weights': avg_weights,  'total_weights': total_weights, 'counts': counts, 'max_weights': max_weights, 'one_rep_maxes': one_rep_maxes, 'units': user.workout_user.unit_type}, safe=False)
 
 
 def ExercisesPerformed(request):

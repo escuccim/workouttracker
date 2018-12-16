@@ -1045,6 +1045,14 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
                     backgroundColor: 'rgba(175, 20, 50, 0.1)',
                     borderColor: 'rgba(225, 20, 50, 0.5)',
                 });
+        datasets.push({
+                    label: 'One Rep Max',
+                    data: data.one_rep_maxes,
+                    yAxisID: 'B',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(20, 20, 20, 0.05)',
+                    borderColor: 'rgba(20, 20, 20, 0.5)',
+                });
 
         scales = {
               yAxes: [ {
