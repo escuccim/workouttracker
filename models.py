@@ -341,11 +341,13 @@ class WorkoutSummary(models.Model):
             end_date = datetime.datetime.now().date()
 
         end_date = (end_date + datetime.timedelta(days=1))
-
+        upper_body = False
         workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date).order_by("-start")
 
-        if group is not None and group is not "":
+        if group is not None and group != "Upper Body":
             workouts = workouts.filter(group__name=group)
+        elif group == "Upper Body":
+            upper_body = True
 
         workouts = workouts.order_by("start")
 
@@ -398,6 +400,13 @@ class WorkoutSummary(models.Model):
             workout_dict[group]['total_weight'][idx] = total_weight
             workout_dict[group]['total_sets'][idx] = total_sets
             workout_dict[group]['total_reps'][idx] = total_reps
+
+        # handle case for upper body
+        if upper_body:
+            child_groups = MuscleGroup.objects.filter(parent__name="Upper Body")
+            groups = {}
+            for group in child_groups:
+                groups[group.name] = group.color
 
         return workout_dict, groups, dates
 

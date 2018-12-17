@@ -146,7 +146,7 @@ $("#add_weight").on("click", function(e){
 $("#strength-group").on("change", function(e){
     group = $(this).val();
     by = $("#strength-unit-group").val();
-    if(group != ""){
+    if(group != "" && group != "Upper Body"){
         start_date = $("#start_date").val();
         end_date = $("#end_date").val();
         strength_detail_chart(ctx, myChart, start_date, end_date, $(this).val(), by);
@@ -888,8 +888,14 @@ function convertHexToRGB(hex, alpha)
 }
 
 function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
+    group = $("#strength-group").val();
 
-    url = "api/strength_data?foo=bar";
+    if(group == ""){
+        url = "api/strength_data?foo=bar";
+    } else {
+        url = "api/strength_data?group="+group;
+    }
+
     if(start_date != undefined){
         url += "&start=" + start_date;
     }
@@ -913,6 +919,7 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
     if(by == "weight"){
         datasets = []
         for(group in data.groups){
+            console.log(group);
             use_group = false;
 
             // check that the data has some values in it
