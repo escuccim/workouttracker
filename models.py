@@ -367,46 +367,54 @@ class WorkoutSummary(models.Model):
         # remove the last day since that is the day after the end of the period
         dates.pop()
 
-        for workout in workouts:
-            group = workout.group.name
-
-            if group not in workout_dict:
-                workout_dict[group] = {'avg_weight': copy.copy(blanks), 'max_weight': copy.copy(blanks), 'total_weight': copy.copy(blanks),'total_reps': copy.copy(blanks), 'total_sets': copy.copy(blanks)}
-                groups[group] = workout.group.color
-
-        for workout in workouts:
-            exercises = workout.workoutdetail_set.all()
-            date = str(workout.start.year) + "-" + str(workout.start.month).zfill(2) + "-" + str(workout.start.day).zfill(2)
-
-            group = workout.group.name
-
-            total_weight = 0
-            total_sets = 0
-            total_reps = 0
-            weights = []
-
-            for exercise in exercises:
-                weights.append(exercise.weight)
-                total_weight += (exercise.reps * exercise.sets * exercise.weight)
-                total_sets += exercise.sets
-                total_reps += exercise.sets * exercise.reps
-
-            idx = dates.index(date)
-
-            if len(weights):
-                workout_dict[group]['max_weight'][idx] = np.max(weights)
-                workout_dict[group]['avg_weight'][idx] = round(np.mean(weights), 2)
-
-            workout_dict[group]['total_weight'][idx] = total_weight
-            workout_dict[group]['total_sets'][idx] = total_sets
-            workout_dict[group]['total_reps'][idx] = total_reps
-
         # handle case for upper body
         if upper_body:
             child_groups = MuscleGroup.objects.filter(parent__name="Upper Body")
             groups = {}
             for group in child_groups:
                 groups[group.name] = group.color
+
+        for workout in workouts:
+            group = workout.group.name
+
+            if group not in workout_dict:
+                if not upper_body:
+                    workout_dict[group] = {'avg_weight': copy.copy(blanks), 'max_weight': copy.copy(blanks), 'total_weight': copy.copy(blanks),'total_reps': copy.copy(blanks), 'total_sets': copy.copy(blanks)}
+                    groups[group] = workout.group.color
+                else:
+                    if group in groups:
+                        workout_dict[group] = {'avg_weight': copy.copy(blanks), 'max_weight': copy.copy(blanks),
+                                               'total_weight': copy.copy(blanks), 'total_reps': copy.copy(blanks),
+                                               'total_sets': copy.copy(blanks)}
+
+
+        for workout in workouts:
+            group = workout.group.name
+            
+            if group in groups:
+                exercises = workout.workoutdetail_set.all()
+                date = str(workout.start.year) + "-" + str(workout.start.month).zfill(2) + "-" + str(workout.start.day).zfill(2)
+
+                total_weight = 0
+                total_sets = 0
+                total_reps = 0
+                weights = []
+
+                for exercise in exercises:
+                    weights.append(exercise.weight)
+                    total_weight += (exercise.reps * exercise.sets * exercise.weight)
+                    total_sets += exercise.sets
+                    total_reps += exercise.sets * exercise.reps
+
+                idx = dates.index(date)
+
+                if len(weights):
+                    workout_dict[group]['max_weight'][idx] = np.max(weights)
+                    workout_dict[group]['avg_weight'][idx] = round(np.mean(weights), 2)
+
+                workout_dict[group]['total_weight'][idx] = total_weight
+                workout_dict[group]['total_sets'][idx] = total_sets
+                workout_dict[group]['total_reps'][idx] = total_reps
 
         return workout_dict, groups, dates
 
