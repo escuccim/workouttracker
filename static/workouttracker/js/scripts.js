@@ -397,6 +397,7 @@ function show_strength_detail(data){
             html += '<td class="text-right">' + data.workouts[exercise][i].reps + '</td>';
             html += '<td class="text-right">' + Math.round(data.workouts[exercise][i].weight * multiplier * 100) / 100 + '</td>';
             html += '<td class="text-right">' + Math.round(data.workouts[exercise][i].total_weight * multiplier * 100) / 100 + '</td>';
+            html += '<td><a class="edit-workout" data-val="' + data.workouts[exercise][i].workout_id + '"><i class="fas fa-edit"></i></a></td>';
             html += '</tr>';
         }
     }

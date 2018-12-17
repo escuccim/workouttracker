@@ -494,9 +494,9 @@ def StrengthDetails(request):
         for exercise in exercises:
             if exercise.exercise.name in workout_dict:
                 workout_dict[exercise.exercise.name].append({'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight,
-                     'total_weight': (exercise.sets * exercise.reps * exercise.weight)})
+                     'total_weight': (exercise.sets * exercise.reps * exercise.weight), 'workout_id': workout.id })
             else:
-                workout_dict[exercise.exercise.name] = [{'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight)}]
+                workout_dict[exercise.exercise.name] = [{'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight), 'workout_id': workout.id }]
 
     return JsonResponse({'workouts': workout_dict, 'units': user.workout_user.unit_type })
 
