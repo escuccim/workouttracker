@@ -108,6 +108,8 @@ def ChartSummary(request):
 
     workouts = WorkoutSummary.summary_breakdown(user, start_date=start_date, end_date=end_date)
 
+
+
     return JsonResponse({'workouts':workouts, 'days': days})
 
 def ExerciseBreakdown(request):

@@ -37,6 +37,19 @@ $("#controller").on("submit", function(e){
     }
 });
 
+$(document).on("click", "#exclude_rest_days", function(e){
+    url = "api/chart_data?foo=bar";
+    if(start_date != undefined){
+        url += "&start=" + start_date;
+    }
+    if(end_date != undefined) {
+        url += "&end=" + end_date;
+    }
+    data = get_chart_data(url);
+
+    summary_text(start_date, end_date, data);
+});
+
 $(document).on("click", ".export_data", function(e){
     e.preventDefault();
 
@@ -731,7 +744,13 @@ function add(a, b) {
     return a + b;
 }
 
-function summary_text(start_date, end_date){
+function summary_text(start_date, end_date, chart_data){
+    exclude_rest_days = $("#exclude_rest_days").prop("checked");
+    if(exclude_rest_days == true){
+        erd_checked = 'checked="checked"';
+    } else {
+        erd_checked = '';
+    }
     url = "api/chart_summary?foo=bar";
     if(start_date != undefined){
         url += "&start=" + start_date;
@@ -745,7 +764,20 @@ function summary_text(start_date, end_date){
     total_total_min = 0;
     total_total_kcal = 0;
     workouts = data.workouts
-    count = data.days;
+    exclude_rest_days = $("#exclude_rest_days").prop("checked");
+
+    // if we are including rest days in the average use the total number of days in the period
+    // else use only the days with activity
+    if(exclude_rest_days == true){
+        count = 0;
+        for(var i = 0; i < chart_data.minutes.length; i++){
+            if(chart_data.minutes[i] > 0){
+                count++;
+            }
+        }
+    } else {
+        count = data.days;
+    }
 
     for(group in workouts){
         total_kcal = workouts[group]['calories'].reduce(add, 0);
@@ -759,7 +791,7 @@ function summary_text(start_date, end_date){
 
     html += '<tr class="row_top_border"><td><b>Total:</b></td><td class="text-right">'+numberWithCommas(total_total_min)+'</td><td class="text-right">'+ numberWithCommas((total_total_min / count).toFixed(1)) + '</td><td class="text-right">'+ numberWithCommas(total_total_kcal) +'</td><td class="text-right">'+ numberWithCommas((total_total_kcal / count).toFixed(1)) + '</td></tr>';
 
-    html += '</table></div></div>';
+    html += '</table></div><div class="col-sm-12 text-right"><input type="checkbox" name="exclude_rest_days" id="exclude_rest_days" '+ erd_checked+'> Exclude rest days</div></div>';
 
     $("#details").html(html);
     $("#details").show();
@@ -842,7 +874,7 @@ function summary_chart(ctx, myChart, start_date, end_date){
         }
     });
 
-    summary_text(start_date, end_date);
+    summary_text(start_date, end_date, data);
 
     return myChart;
 }
