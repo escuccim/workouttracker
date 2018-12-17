@@ -63,7 +63,11 @@ def Index(request):
     except:
         has_profile = False
 
-    start_date, end_date = get_dates_from_request(request)
+    if user.id != 10:
+        start_date, end_date = get_dates_from_request(request)
+    else:
+        start_date = datetime.datetime.strptime('2018-11-16', '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime('2018-12-16', '%Y-%m-%d').date()
 
     workouts = WorkoutSummary.workouts_by_day(user=user, start_date=start_date, end_date=end_date)
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
@@ -107,8 +111,6 @@ def ChartSummary(request):
     days = (end_date - start_date).days
 
     workouts = WorkoutSummary.summary_breakdown(user, start_date=start_date, end_date=end_date)
-
-
 
     return JsonResponse({'workouts':workouts, 'days': days})
 
@@ -279,7 +281,8 @@ def EditWorkoutSummary(request, pk):
             workout = form.save(commit=False)
             workout.start = datetime.datetime.combine(date, time)
             workout.user_id = user.id
-            workout.save()
+            if user.id != 10:
+                workout.save()
 
             # save the details
             details = exercise_form.save(commit=False)
@@ -293,7 +296,8 @@ def EditWorkoutSummary(request, pk):
                     detail.units = "kgs"
                     detail.weight = detail.weight / 2.2
 
-                detail.save()
+                if user.id != 10:
+                    detail.save()
 
             return JsonResponse({'success': True, 'id': workout.id })
         else:
@@ -322,7 +326,8 @@ def AddWorkoutSummary(request):
             workout = form.save(commit=False)
             workout.start = datetime.datetime.combine(date, time)
             workout.user_id = user.id
-            workout.save()
+            if user.id != 10:
+                workout.save()
 
             # save the details
             details = exercise_form.save(commit=False)
@@ -335,7 +340,8 @@ def AddWorkoutSummary(request):
                     detail.units = "kgs"
                     detail.weight = detail.weight / 2.2
 
-                detail.save()
+                if user.id != 10:
+                    detail.save()
 
             return JsonResponse({'success': True, 'id': workout.id})
         else:
@@ -350,7 +356,8 @@ def AddWorkoutSummary(request):
 def DeleteWorkout(request, pk):
     user = request.user
     workout = WorkoutSummary.objects.filter(user=user).filter(pk=pk).first()
-    workout.delete()
+    if user.id != 10:
+        workout.delete()
 
     return JsonResponse({'success': True})
 
@@ -395,7 +402,8 @@ def AddWeight(request):
         else:
             pass
 
-        weight.save()
+        if user.id != 10:
+            weight.save()
 
         return JsonResponse({'success': True, 'weight': model_to_dict(weight)}, safe=False)
 
@@ -405,7 +413,8 @@ def DeleteWeight(request, pk):
     user = request.user
     weight = WeightHistory.objects.filter(user=user).filter(pk=pk).first()
     if weight:
-        weight.delete()
+        if user.id != 10:
+            weight.delete()
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
@@ -425,7 +434,8 @@ def EditProfile(request):
             new_user = True
 
         if profile_form.is_valid() and user_form.is_valid():
-            user_form.save()
+            if user.id != 10:
+                user_form.save()
 
             profile = profile_form.save(commit=False)
             profile.user = user
@@ -433,7 +443,8 @@ def EditProfile(request):
             if profile.unit_type == "imp":
                 profile.height *= 2.54
 
-            profile.save()
+            if user.id != 10:
+                profile.save()
 
             return JsonResponse({'success': True})
 
@@ -648,7 +659,8 @@ def AddExercise(request):
             exercise.med_mets = 4
             exercise.high_mets = 5
 
-        exercise.save()
+        if request.user.id != 10:
+            exercise.save()
 
         return JsonResponse({'success': True, 'exercise': model_to_dict(exercise)})
     else:

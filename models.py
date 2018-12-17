@@ -390,7 +390,7 @@ class WorkoutSummary(models.Model):
 
         for workout in workouts:
             group = workout.group.name
-            
+
             if group in groups:
                 exercises = workout.workoutdetail_set.all()
                 date = str(workout.start.year) + "-" + str(workout.start.month).zfill(2) + "-" + str(workout.start.day).zfill(2)
