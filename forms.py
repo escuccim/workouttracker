@@ -2,7 +2,7 @@ from django.forms import ModelForm
 from django import forms
 from datetime import datetime
 from django.forms.widgets import TextInput, SplitDateTimeWidget, SelectDateWidget
-from .models import MuscleGroup, WorkoutSummary, WorkoutDetail, UserProfile
+from .models import MuscleGroup, WorkoutSummary, WorkoutDetail, UserProfile, Exercise
 from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget
 from django.contrib.auth.models import User
 

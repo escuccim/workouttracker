@@ -47,7 +47,10 @@
         </div>
         {{ exercise_form.management_form }}
         <div class="exercise_detail_form" {% if not workout.id %}style="display: none;"{% endif %}>
-            <div class="row">
+            <div class="row small">
+                <div class="col-md-12"><h4>Exercises:</h4></div>
+            </div>
+            <div class="row large">
                 <div class="col-sm-3">
                     <label for="exercise">Exercise:</label>
                 </div>
@@ -78,33 +81,40 @@
                     {% for field in form %}
                         {% if field.name == "exercise" %}
                             <div class="col-sm-3">
+                                <label class="control-label small">Exercise: </label>
                                 {{ field }}
                                 <img src="/static/admin/img/icon-addlink.svg" alt="Add" class="add_exercise" data-target="{{ field.auto_id }}">
                             </div>
                         {% elif field.name == "intensity" %}
                              <div class="col-sm-2">
+                                 <label class="control-label small">Intensity: </label>
                                 {{ field }}
                             </div>
                         {% elif  field.name == "distance" %}
                              <div class="col-sm-2 walk_field">
+                                 <label class="control-label small">Distance: </label>
                                 {{ field }}
                             </div>
                         {% elif field.name == "duration"  %}
                             <div class="col-sm-2">
+                                <label class="control-label small">Duration: </label>
                                 {{ field }}
                             </div>
                         {% elif field.name == "id" %}
                             {{ field }}
                         {% elif field.name == "DELETE" %}
-                            <div class="col-sm-1 text-center">
+                            <div class="col-sm-1 text-left">
+                                <label class="control-label small">{{ field.label }}: </label>
                                 {{ field }}
                             </div>
                         {% elif field.name == "reps" or field.name == "sets" %}
                             <div class="col-sm-1 strength_field">
+                                <label class="control-label small">{{ field.label }}: </label>
                                 {{ field }}
                             </div>
                         {% elif field.name == "weight"  %}
                             <div class="col-sm-2 strength_field">
+                                <label class="control-label small">{{ field.label }}: </label>
                                 {{ field }}
                             </div>
                         {% else %}
@@ -112,8 +122,8 @@
                                 {{ field }}
                             </div>
                         {% endif %}
-
                     {% endfor %}
+                    <div class="col-xs-12 small"><hr></div>
                 </div>
             {% endfor %}
         </div>
