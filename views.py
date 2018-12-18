@@ -594,7 +594,7 @@ def HistoryByExercise(request, pk):
                 workout_dict[date_str]['max_weight'] = workout.weight
                 workout_dict[date_str]['max_reps'] = workout.reps
         else:
-            workout_dict[date_str] = {'reps': workout.reps, 'max_reps': workout.reps, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
+            workout_dict[date_str] = {'reps': workout.reps * workout.sets, 'max_reps': workout.reps, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
 
     sets = []
     reps = []
