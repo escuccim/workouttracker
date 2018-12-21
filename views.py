@@ -584,6 +584,8 @@ def HistoryByExercise(request, pk):
 
         dict = model_to_dict(workout)
 
+        orm = one_rep_max(workout.reps, workout.weight)
+
         if date_str in workout_dict:
             workout_dict[date_str]['reps'] += (workout.reps * workout.sets)
             workout_dict[date_str]['sets'] += workout.sets
@@ -593,8 +595,11 @@ def HistoryByExercise(request, pk):
             if workout.weight > workout_dict[date_str]['max_weight']:
                 workout_dict[date_str]['max_weight'] = workout.weight
                 workout_dict[date_str]['max_reps'] = workout.reps
+            if orm > workout_dict[date_str]['one_rep_max']:
+                workout_dict[date_str]['one_rep_max'] = orm
+
         else:
-            workout_dict[date_str] = {'reps': workout.reps * workout.sets, 'max_reps': workout.reps, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
+            workout_dict[date_str] = {'reps': workout.reps * workout.sets, 'one_rep_max': orm, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
 
     sets = []
     reps = []
@@ -612,7 +617,7 @@ def HistoryByExercise(request, pk):
             counts.append(workout_dict[date]['count'])
             max_weights.append(workout_dict[date]['max_weight'])
             avg_weights.append(workout_dict[date]['weight'] / (workout_dict[date]['count']))
-            one_rep_maxes.append(one_rep_max(workout_dict[date]['max_reps'], workout_dict[date]['max_weight']))
+            one_rep_maxes.append(workout_dict[date]['one_rep_max'])
         else:
             sets.append(None)
             reps.append(None)
