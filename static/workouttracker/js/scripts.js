@@ -173,6 +173,7 @@ $(document).on("click", ".add_exercise", function(e){
 
 $("#add_exercise_form").on("submit", function(e){
     e.preventDefault();
+    $("#loadingModal").modal("show");
 
     // get the target so we know which field to select the new value from
     target = $("#target").val();
@@ -194,13 +195,13 @@ $("#add_exercise_form").on("submit", function(e){
                     // close the modal
                     $("#exerciseModal").modal("hide");
                  }
+                 $("#loadingModal").modal("hide");
             },
             error   : function( xhr, err ) {
                  console.log(err);
+                 $("#loadingModal").modal("hide");
             }
         });
-
-
 });
 
 $(".add_workout").on("click", function(e){
@@ -349,7 +350,7 @@ $(document).on("click", "#delete-yes", function(e){
 
 $(document).on("submit", "#profile_form", function(e){
     e.preventDefault();
-
+    $("#loadingModal").modal("show");
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -364,9 +365,11 @@ $(document).on("submit", "#profile_form", function(e){
                  else {
                     // form validation should cover the errors, but we may need to address them here in the future?
                  }
+                 $("#loadingModal").modal("hide");
             },
             error   : function( xhr, err ) {
                  console.log(err);
+                 $("#loadingModal").modal("hide");
             }
         });
 });
@@ -475,7 +478,7 @@ $(document).on("click", "#close_form", function(e){
 
 $(document).on("submit", "#weight_form", function(e){
     e.preventDefault();
-
+    $("#loadingModal").modal("show");
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -490,15 +493,18 @@ $(document).on("submit", "#weight_form", function(e){
                  else {
                     // form validation should cover the errors, but we may need to address them here in the future?
                  }
+                 $("#loadingModal").modal("hide");
             },
             error   : function( xhr, err ) {
                  console.log(err);
+                 $("#loadingModal").modal("hide");
             }
         });
 });
 
 $(document).on("submit", "#add_workout_form", function(e){
     e.preventDefault();
+    $("#loadingModal").modal("show");
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -519,15 +525,18 @@ $(document).on("submit", "#add_workout_form", function(e){
                  else {
                     // form validation should cover the errors, but we may need to address them here in the future?
                  }
+                 $("#loadingModal").modal("hide");
             },
             error   : function( xhr, err ) {
                  console.log(err);
+                 $("#loadingModal").modal("hide");
             }
         });
 });
 
 $(document).on("submit", "#edit_workout_form", function(e){
     e.preventDefault();
+    $("#loadingModal").modal("show");
     $.ajax({
             url     : $(this).attr('action'),
             type    : $(this).attr('method'),
@@ -548,9 +557,11 @@ $(document).on("submit", "#edit_workout_form", function(e){
                  else {
 
                  }
+                 $("#loadingModal").modal("hide");
             },
             error   : function( xhr, err ) {
                  console.log(err);
+                 $("#loadingModal").modal("hide");
             }
         });
 });
