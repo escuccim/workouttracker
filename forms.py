@@ -36,7 +36,7 @@ class WorkoutDetailForm(ModelForm):
             'distance': forms.NumberInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control'}),
             'reps': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control no-arrows', 'type': 'number'}),
             'sets': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control no-arrows', 'type': 'number'}),
-            'weight': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control weight_field', 'type': 'number'}),
+            'weight': forms.TextInput(attrs={'size': 3, 'min': 0, 'style': 'width: 100%;', 'class': 'form-control weight_field', 'type': 'number', 'step': 'any'}),
             'duration': forms.TextInput(attrs={'style': 'width: 100%;', 'min': 0, 'class': 'form-control', 'type': 'number'}),
         }
 
