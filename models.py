@@ -448,7 +448,7 @@ class WorkoutSummary(models.Model):
 
         end_date = (end_date + datetime.timedelta(days=1))
 
-        workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date).exclude(group_id=24)
+        workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date)#.exclude(group_id=24)
 
         workout_dict = {}
         for workout in workouts:
