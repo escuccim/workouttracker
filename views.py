@@ -195,6 +195,7 @@ def ExerciseDetails(request, id):
     for workout in details:
         dict = model_to_dict(workout)
         dict['exercise'] = workout.exercise.name
+        dict['exercise_id'] = workout.exercise.id
         dict['user_units'] = user.workout_user.unit_type
         data.append(dict)
 
@@ -505,9 +506,9 @@ def StrengthDetails(request):
         for exercise in exercises:
             if exercise.exercise.name in workout_dict:
                 workout_dict[exercise.exercise.name].append({'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight,
-                     'total_weight': (exercise.sets * exercise.reps * exercise.weight), 'workout_id': workout.id })
+                     'total_weight': (exercise.sets * exercise.reps * exercise.weight), 'workout_id': workout.id, 'exercise_id': exercise.exercise.id })
             else:
-                workout_dict[exercise.exercise.name] = [{'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight), 'workout_id': workout.id }]
+                workout_dict[exercise.exercise.name] = [{'sets': exercise.sets, 'reps': exercise.reps, 'weight': exercise.weight, 'total_weight': (exercise.sets * exercise.reps * exercise.weight), 'workout_id': workout.id, 'exercise_id': exercise.exercise.id }]
 
     return JsonResponse({'workouts': workout_dict, 'units': user.workout_user.unit_type })
 
@@ -590,6 +591,7 @@ def HistoryByExercise(request, pk):
             workout_dict[date_str]['reps'] += (workout.reps * workout.sets)
             workout_dict[date_str]['sets'] += workout.sets
             workout_dict[date_str]['weight'] += workout.weight
+            workout_dict[date_str]['time'] += workout.duration
             workout_dict[date_str]['total_weight'] += (workout.weight * workout.reps * workout.sets)
             workout_dict[date_str]['count'] += 1
             if workout.weight > workout_dict[date_str]['max_weight']:
@@ -599,7 +601,7 @@ def HistoryByExercise(request, pk):
                 workout_dict[date_str]['one_rep_max'] = orm
 
         else:
-            workout_dict[date_str] = {'reps': workout.reps * workout.sets, 'one_rep_max': orm, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
+            workout_dict[date_str] = {'reps': workout.reps * workout.sets, 'time': workout.duration, 'one_rep_max': orm, 'sets': workout.sets, 'weight': workout.weight, 'total_weight': workout.weight * workout.reps * workout.sets, 'max_weight': workout.weight, 'count': 1}
 
     sets = []
     reps = []
@@ -608,6 +610,8 @@ def HistoryByExercise(request, pk):
     max_weights = []
     avg_weights = []
     one_rep_maxes = []
+    durations = []
+
     # convert to lists by date
     for date in dates:
         if date in workout_dict:
@@ -618,6 +622,7 @@ def HistoryByExercise(request, pk):
             max_weights.append(workout_dict[date]['max_weight'])
             avg_weights.append(workout_dict[date]['weight'] / (workout_dict[date]['count']))
             one_rep_maxes.append(workout_dict[date]['one_rep_max'])
+            durations.append(workout_dict[date]['time'])
         else:
             sets.append(None)
             reps.append(None)
@@ -625,9 +630,10 @@ def HistoryByExercise(request, pk):
             counts.append(None)
             max_weights.append(None)
             avg_weights.append(None)
+            durations.append(None)
             one_rep_maxes.append(None)
 
-    return JsonResponse({'dates': dates, 'exercises': workout_dict, 'sets': sets, 'reps': reps, 'avg_weights': avg_weights,  'total_weights': total_weights, 'counts': counts, 'max_weights': max_weights, 'one_rep_maxes': one_rep_maxes, 'units': user.workout_user.unit_type}, safe=False)
+    return JsonResponse({'dates': dates, 'duration': durations, 'exercises': workout_dict, 'sets': sets, 'reps': reps, 'avg_weights': avg_weights,  'total_weights': total_weights, 'counts': counts, 'max_weights': max_weights, 'one_rep_maxes': one_rep_maxes, 'units': user.workout_user.unit_type}, safe=False)
 
 
 def ExercisesPerformed(request):

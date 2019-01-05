@@ -395,7 +395,7 @@ function show_strength_detail(data){
     html = '<td></td><td colspan=7><table class="table table-striped"><thead><tr><th>Exercise</th><th class="text-right">Sets</th><th class="text-right">Reps</th><th class="text-right">Weight ('+label_str+')</th><th class="text-right">Weight Moved ('+label_str+')</th></tr></thead>';
     for(exercise in data.workouts){
         for(var i=0; i<data.workouts[exercise].length; i++){
-            html += '<tr><td>' + exercise + '</td>';
+            html += '<tr><td><a class="exercise_link" data-val="' + data.workouts[exercise][i].exercise_id + '">' + exercise + '</a></td>';
             html += '<td class="text-right">' + data.workouts[exercise][i].sets + '</td>';
             html += '<td class="text-right">' + data.workouts[exercise][i].reps + '</td>';
             html += '<td class="text-right">' + Math.round(data.workouts[exercise][i].weight * multiplier * 100) / 100 + '</td>';
@@ -500,6 +500,28 @@ $(document).on("submit", "#weight_form", function(e){
                  $("#loadingModal").modal("hide");
             }
         });
+});
+
+$(document).on("click", ".exercise_link", function(e){
+    e.preventDefault();
+    id = $(this).data("val");
+    console.log(id);
+
+    // switch to history by exercise report
+    $("#chart").val("by_exercise");
+    $("#charts").show();
+    $("#details").hide();
+    $(".strength-drill-down").hide();
+    $(".exercise_selection").hide();
+
+    by = $("#exercise_history_by").val();
+    start_date = $("#start_date").val();
+    end_date = $("#end_date").val();
+
+    $(".exercise_selection").show();
+    $("#select_exercise").val(id);
+
+    history_by_exercise_chart(ctx, myChart, start_date, end_date);
 });
 
 $(document).on("submit", "#add_workout_form", function(e){
@@ -687,7 +709,7 @@ function display_exercise_detail(id, data){
     }
 
     for(var i = 0; i < data.length; i++){
-        html += '<tr><td>' + data[i].exercise + '</td>';
+        html += '<tr><td><a class="exercise_link" data-val="' + data[i].exercise_id + '">' + data[i].exercise + '</a></td>';
         if(data[i].sets != 0 && data[i].reps != 0){
             if(data[i].user_units == "imp") {
                 label_str = "lbs";
@@ -1127,6 +1149,36 @@ function history_by_exercise_chart(ctx, myChart, start_date, end_date, by="weigh
                 scaleLabel: {
                     display: true,
                     labelString: 'Weight ('+label_str +')',
+                }
+              }]
+            };
+        callbacks = {
+                    label: function(tooltipItems, data) {
+                       return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + ' ' + label_str;
+                    }
+                };
+    } else if(by == "time"){
+        datasets = []
+        datasets.push({
+                    label: 'Time',
+                    data: data.duration,
+                    yAxisID: 'A',
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(50, 120, 255, 0.2)',
+                    borderColor: 'rgba(50, 120, 255, 0.5)',
+                });
+
+        scales = {
+              yAxes: [ {
+                id: 'A',
+                type: 'linear',
+                position: 'right',
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Time (min)',
                 }
               }]
             };
