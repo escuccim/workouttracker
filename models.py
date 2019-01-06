@@ -334,13 +334,15 @@ class WorkoutSummary(models.Model):
         super(WorkoutSummary, self).save(*args, **kwargs)
 
     @staticmethod
-    def strength_training_history(user,  end_date=None, start_date=None, group=None):
+    def strength_training_history(user, end_date=None, start_date=None, group=None):
         if start_date is None:
             start_date = (datetime.datetime.now() - datetime.timedelta(days=15)).date()
         if end_date is None:
             end_date = datetime.datetime.now().date()
 
-        end_date = (end_date + datetime.timedelta(days=1))
+        print("end:", end_date)
+
+        # end_date = (end_date + datetime.timedelta(days=1))
         upper_body = False
         workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date).order_by("-start")
 
@@ -355,14 +357,17 @@ class WorkoutSummary(models.Model):
         groups = {}
         dates = []
         blanks = []
+        print("start:", start_date)
+        print("end:", end_date)
 
         # create our list of dates - we will show all dates, not just those where exercise was performed
         current_date = start_date
-        while(current_date < end_date):
+        while(current_date <= end_date):
             date = str(current_date.year) + "-" + str(current_date.month).zfill(2) + "-" + str(current_date.day).zfill(2)
             dates.append(date)
             current_date = (current_date + datetime.timedelta(days=1))
             blanks.append(None)
+        print("dates:", dates)
 
         # remove the last day since that is the day after the end of the period
         dates.pop()
