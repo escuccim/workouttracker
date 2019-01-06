@@ -505,7 +505,6 @@ $(document).on("submit", "#weight_form", function(e){
 $(document).on("click", ".exercise_link", function(e){
     e.preventDefault();
     id = $(this).data("val");
-    console.log(id);
 
     // switch to history by exercise report
     $("#chart").val("by_exercise");
@@ -655,7 +654,6 @@ $(".date-filter-button").on("click", function(e){
         date_string += (start_date.getMonth()).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
     }
 
-    console.log(date_string);
     $("#start_date").val(date_string);
     $("#controller").trigger("submit");
 });
@@ -952,7 +950,6 @@ function strength_chart(ctx, myChart, start_date, end_date, by="weight"){
     if(by == "weight"){
         datasets = []
         for(group in data.groups){
-            console.log(group);
             use_group = false;
 
             // check that the data has some values in it
