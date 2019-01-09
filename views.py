@@ -141,6 +141,7 @@ def ExerciseBreakdown(request):
         if group.super_group == 0:
             data_dict[group.name] = {'minutes': [0] * len(dates), 'calories': [0] * len(dates), 'color': group.color, 'dates': dates}
 
+    used_muscle_groups = []
     for i, date in enumerate(dates):
         date_str = date_to_string(date)
 
@@ -150,7 +151,7 @@ def ExerciseBreakdown(request):
                 if workout.group.super_group == 0:
                     # if the group is not already in our list add it
                     if workout.group.name not in muscle_groups:
-                        muscle_groups.append(workout.group.name)
+                        used_muscle_groups.append(workout.group.name)
 
                     data_dict[workout.group.name]['minutes'][i] += workout.duration
                     data_dict[workout.group.name]['calories'][i] += workout.calories
@@ -172,10 +173,15 @@ def ExerciseBreakdown(request):
 
                         current_group = exercise.exercise.main_group.name
                         if current_group not in muscle_groups:
-                            muscle_groups.append(current_group)
+                            used_muscle_groups.append(current_group)
 
                         data_dict[current_group]['minutes'][i] += exercise.duration
                         data_dict[current_group]['calories'][i] += exercise.calories
+
+    # clean up our list of groups
+    for group in major_groups:
+        if group.name in used_muscle_groups:
+            muscle_groups.append(group.name)
 
     return JsonResponse({'dates': dates, 'groups': muscle_groups, 'data': data_dict }, safe=False)
 
