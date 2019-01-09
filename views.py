@@ -132,37 +132,50 @@ def ExerciseBreakdown(request):
 
     # make a list of all the major muscle groups
     muscle_groups = []
+    full_body_workouts = []
+
     data_dict = {}
+
+    # initialize our data dict
     for group in major_groups:
-        data_dict[group.name] = {'minutes': [], 'calories': [], 'color': group.color, 'dates': []}
+        if group.super_group == 0:
+            data_dict[group.name] = {'minutes': [0] * len(dates), 'calories': [0] * len(dates), 'color': group.color, 'dates': dates}
 
-        for i, date in enumerate(dates):
-            date_str = date_to_string(date)
-            found = False
-            if date_str in workouts:
-                for workout in workouts[date_str]:
-                    if workout.group.name == group.name:
-                        if group.name not in muscle_groups:
-                            muscle_groups.append(group.name)
+    for i, date in enumerate(dates):
+        date_str = date_to_string(date)
 
-                        if date_str not in data_dict[group.name]['dates']:
-                            data_dict[group.name]['minutes'].append(workout.duration)
-                            data_dict[group.name]['calories'].append(workout.calories)
-                            data_dict[group.name]['dates'].append(date_str)
-                        # handle multiple occurences of same exercise on a day
-                        else:
-                            data_dict[group.name]['minutes'][i] += workout.duration
-                            data_dict[group.name]['calories'][i] += workout.calories
+        if date_str in workouts:
+            for workout in workouts[date_str]:
+                # if it is part of a per group workout
+                if workout.group.super_group == 0:
+                    # if the group is not already in our list add it
+                    if workout.group.name not in muscle_groups:
+                        muscle_groups.append(workout.group.name)
 
-                        found = True
+                    data_dict[workout.group.name]['minutes'][i] += workout.duration
+                    data_dict[workout.group.name]['calories'][i] += workout.calories
 
-            if not found:
-                data_dict[group.name]['minutes'].append(0)
-                data_dict[group.name]['calories'].append(0)
-                data_dict[group.name]['dates'].append(date_str)
+                # else if workout contains multiple groups
+                else:
+                    # get the summary info for the workout
+                    total_time = workout.duration
+                    total_reps = 0
+                    for exercise in workout.workoutdetail_set.all():
+                        total_reps += (exercise.reps * exercise.sets)
 
-    # loop through the summaries and put them in day/group format
+                    # loop through the exercises and use the main group of each
+                    for exercise in workout.workoutdetail_set.all():
+                        exercise_reps = (exercise.sets * exercise.reps)
+                        exercise_percent = exercise_reps / total_reps
+                        exercise.duration = total_time * exercise_percent
+                        exercise.calories = workout.calories * exercise_percent
 
+                        current_group = exercise.exercise.main_group.name
+                        if current_group not in muscle_groups:
+                            muscle_groups.append(current_group)
+
+                        data_dict[current_group]['minutes'][i] += exercise.duration
+                        data_dict[current_group]['calories'][i] += exercise.calories
 
     return JsonResponse({'dates': dates, 'groups': muscle_groups, 'data': data_dict }, safe=False)
 

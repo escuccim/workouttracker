@@ -223,6 +223,7 @@ class MuscleGroup(models.Model):
     area = models.ForeignKey(BodyAreas, on_delete=models.DO_NOTHING, blank=True, null=True)
     type = models.ForeignKey("ExerciseType", on_delete=models.DO_NOTHING, blank=True, null=True)
     display_in_list = models.IntegerField(default=1)
+    super_group = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -340,8 +341,7 @@ class WorkoutSummary(models.Model):
         if end_date is None:
             end_date = datetime.datetime.now().date()
 
-        print("end:", end_date)
-
+        # we already added a day in the view, no need to add another
         # end_date = (end_date + datetime.timedelta(days=1))
         upper_body = False
         workouts = WorkoutSummary.objects.filter(user=user).filter(type_id=2).filter(start__gte=start_date).filter(start__lte=end_date).order_by("-start")
@@ -357,8 +357,6 @@ class WorkoutSummary(models.Model):
         groups = {}
         dates = []
         blanks = []
-        print("start:", start_date)
-        print("end:", end_date)
 
         # create our list of dates - we will show all dates, not just those where exercise was performed
         current_date = start_date
@@ -367,7 +365,6 @@ class WorkoutSummary(models.Model):
             dates.append(date)
             current_date = (current_date + datetime.timedelta(days=1))
             blanks.append(None)
-        print("dates:", dates)
 
         # remove the last day since that is the day after the end of the period
         dates.pop()
