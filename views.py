@@ -233,28 +233,35 @@ def WeightDetails(request):
     else:
         unit_label = "lbs"
 
+    # create the list of dates so the plot is displayed correctly
+    dates = []
+    date = start_date
+    while date < end_date:
+        dates.append(date_to_string(date))
+        date += datetime.timedelta(days=1)
+
     weights = WeightHistory.objects.filter(user=user).filter(datetime__gte=start_date).filter(datetime__lte=end_date)
 
-    weight_dict = {'dates': [], 'weights': [], 'bodyfats': [], 'units': [], 'ids': []}
+    # initialize the dictionary to contain lists the length of dates of Null
+    weight_dict = {'dates': dates, 'weights': [None] * len(dates), 'bodyfats': [None] * len(dates), 'units': [None] * len(dates), 'ids': [None] * len(dates)}
     for weight in weights:
         date_str = date_to_string(weight.datetime)
-        weight_dict['dates'].append(date_str)
+        idx = dates.index(date_str)
+
         if weight.bodyfat != 0:
-            weight_dict['bodyfats'].append(weight.bodyfat)
-        else:
-            weight_dict['bodyfats'].append(None)
-        weight_dict['units'].append(unit_label)
-        weight_dict['ids'].append(weight.id)
+            weight_dict['bodyfats'][idx] = weight.bodyfat
+
+        weight_dict['units'][idx] = unit_label
+        weight_dict['ids'][idx] = weight.id
         if weight.weight != 0:
             # make sure all weights are converted to users preferences
             if units == "metric" and weight.units == "lbs":
-                weight_dict['weights'].append(round(weight.weight / 2.2, 1))
+                weight_dict['weights'][idx] = round(weight.weight / 2.2, 1)
             elif units == "imp" and weight.units == "kg":
-                weight_dict['weights'].append(round(weight.weight * 2.2, 1))
+                weight_dict['weights'][idx] = round(weight.weight * 2.2, 1)
             else:
-                weight_dict['weights'].append(round(weight.weight, 1))
-        else:
-            weight_dict['weights'].append(None)
+                weight_dict['weights'][idx] = round(weight.weight, 1)
+
 
     return JsonResponse(weight_dict, safe=False)
 
