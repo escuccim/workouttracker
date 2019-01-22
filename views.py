@@ -239,18 +239,23 @@ def WeightDetails(request):
     for weight in weights:
         date_str = date_to_string(weight.datetime)
         weight_dict['dates'].append(date_str)
-        weight_dict['bodyfats'].append(weight.bodyfat)
+        if weight.bodyfat != 0:
+            weight_dict['bodyfats'].append(weight.bodyfat)
+        else:
+            weight_dict['bodyfats'].append(None)
         weight_dict['units'].append(unit_label)
         weight_dict['ids'].append(weight.id)
-
-        # make sure all weights are converted to users preferences
-        if units == "metric" and weight.units == "lbs":
-            weight_dict['weights'].append(round(weight.weight / 2.2, 1))
-        elif units == "imp" and weight.units == "kg":
-            weight_dict['weights'].append(round(weight.weight * 2.2, 1))
+        if weight.weight != 0:
+            # make sure all weights are converted to users preferences
+            if units == "metric" and weight.units == "lbs":
+                weight_dict['weights'].append(round(weight.weight / 2.2, 1))
+            elif units == "imp" and weight.units == "kg":
+                weight_dict['weights'].append(round(weight.weight * 2.2, 1))
+            else:
+                weight_dict['weights'].append(round(weight.weight, 1))
         else:
-            weight_dict['weights'].append(round(weight.weight, 1))
-
+            weight_dict['weights'].append(None)
+            
     return JsonResponse(weight_dict, safe=False)
 
 def StrengthData(request):

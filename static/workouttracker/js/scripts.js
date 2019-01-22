@@ -1600,7 +1600,8 @@ function weight_chart(ctx, myChart, start_date, end_date){
             maintainAspectRatio: false,
             scales: {
               yAxes: yAxes,
-            }
+            },
+            spanGaps: true,
         }
     });
     weight_history(data);
