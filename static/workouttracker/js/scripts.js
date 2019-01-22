@@ -644,16 +644,30 @@ $(".date-filter-button").on("click", function(e){
     start_date = new Date($("#end_date").val());
 
     // convert the date into a properly formatted string
+    year = start_date.getFullYear()
+    month = start_date.getMonth() + 1
+    day = start_date.getDate()
     date_string = start_date.getFullYear() + "-"
     if(value == 7){
-        start_date.setDate(start_date.getDate()-value);
-        date_string += (start_date.getMonth()+1).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
+        day -= 7;
+        if(day < 1){
+            day += 30;
+            month -= 1;
+        }
+        if(month <= 0){
+            month = 0;
+            year -= 1;
+        }
     } else if(value == 365){
-        date_string += '01-01';
+        year -= 1;
     } else if(value == 30){
-        date_string += (start_date.getMonth()).toString().padStart(2, '0') + "-" + start_date.getDate().toString().padStart(2, '0');
+        month -= 1;
+        if(month <= 0){
+            month = 12;
+            year -= 1;
+        }
     }
-
+    date_string = year + "-" + month.toString().padStart(2, '0') + "-" + day.toString().padStart(2, '0');
     $("#start_date").val(date_string);
     $("#controller").trigger("submit");
 });
