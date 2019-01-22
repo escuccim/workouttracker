@@ -255,7 +255,7 @@ def WeightDetails(request):
                 weight_dict['weights'].append(round(weight.weight, 1))
         else:
             weight_dict['weights'].append(None)
-            
+
     return JsonResponse(weight_dict, safe=False)
 
 def StrengthData(request):
