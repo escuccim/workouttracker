@@ -51,7 +51,7 @@ def fig_to_base64(fig):
 # Create your views here.
 def Index(request):
     if not request.user.is_authenticated:
-        return redirect('%s?next=%s' % ('/en/user/login', request.path))
+        return redirect('%s?next=%s' % ('/user/login', request.path))
 
     user = request.user
     profile = user.workout_user

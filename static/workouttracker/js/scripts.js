@@ -1627,13 +1627,24 @@ function weight_history(data){
     html = '<div class="col-sm-6 col-sm-offset-3"><table class="table table-striped"><thead><tr><th>Date</th><th>Weight</th><th>Body Fat</th><th colspan="2"></th></tr></thead>';
 
     for(var i = 0; i < data.dates.length; i++){
-        html += '<tr>';
-        html += '<td>' + data.dates[i] + '</td>';
-        html += '<td>' + data.weights[i] + ' ' + data.units[i] + '</td>';
-        html += '<td>' + data.bodyfats[i] + ' %</td>';
-        html += '<td><a class="edit_weight" data-date="' + data.dates[i] + '" data-weight="' + data.weights[i] + '" data-bodyfat="' + data.bodyfats[i] + '" data-val="' + data.ids[i] + '"><i class="fas fa-edit"></i></a></td>';
-        html += '<td><a class="delete_weight" data-val="' + data.ids[i] + '"><i class="fas fa-trash"></i></a></td>';
-        html += '</tr>';
+        if(data.weights[i] != null | data.bodyfats[i] != null){
+            html += '<tr>';
+            html += '<td>' + data.dates[i] + '</td>';
+            if(data.weights[i] != null){
+                html += '<td>' + data.weights[i] + ' ' + data.units[i] + '</td>';
+            } else {
+                html += '<td></td>';
+            }
+            if(data.bodyfats[i] != null){
+                html += '<td>' + data.bodyfats[i] + ' %</td>';
+            } else {
+                html += '<td></td>';
+            }
+
+            html += '<td><a class="edit_weight" data-date="' + data.dates[i] + '" data-weight="' + data.weights[i] + '" data-bodyfat="' + data.bodyfats[i] + '" data-val="' + data.ids[i] + '"><i class="fas fa-edit"></i></a></td>';
+            html += '<td><a class="delete_weight" data-val="' + data.ids[i] + '"><i class="fas fa-trash"></i></a></td>';
+            html += '</tr>';
+        }
     }
     html += '</div>';
 
