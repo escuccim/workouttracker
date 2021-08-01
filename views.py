@@ -80,6 +80,7 @@ def ChartData(request):
     user = request.user
     # get our start and end dates from URL or default to one week up to and including today
     start_date, end_date = get_dates_from_request(request)
+    n_days = (end_date - start_date).days
 
     # create a list of dates between start and end, inclusive
     dates = []
@@ -91,7 +92,7 @@ def ChartData(request):
 
     summaries = WorkoutSummary.summary_by_day(user=user, start_date=start_date, end_date=end_date)
 
-    # get the total minutes and calories for each day in the dates
+    # get the values for every day
     calories_list = np.zeros_like(dates)
     minutes_list = np.zeros_like(dates)
 
@@ -101,6 +102,26 @@ def ChartData(request):
             idx = summaries['dates'].index(date_str)
             calories_list[i] = summaries['calories'][idx]
             minutes_list[i] = summaries['minutes'][idx]
+
+    # if we are looking at 60 to 120 days average per week
+    if 60 <= n_days:
+        if n_days <= 120:
+            interval = 7
+        else:
+            interval = 30
+        print("interval", interval)
+        new_calories_list = []
+        new_minutes_list = []
+        new_dates = []
+        for i, day in enumerate(range(0, n_days, interval)):
+            new_dates.append(dates[day])
+            new_calories_list.append(np.mean(calories_list[day:day+interval]))
+            new_minutes_list.append(np.mean(minutes_list[day:day+interval]))
+
+        calories_list = new_calories_list
+        dates = new_dates
+        minutes_list = new_minutes_list
+
 
     return JsonResponse({'dates': dates, 'calories': list(calories_list), 'minutes': list(minutes_list)}, safe=False)
 
