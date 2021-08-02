@@ -274,7 +274,6 @@ $(document).on("change", "#id_summary-type", function(e){
     } else if (val == 5){
         $(".strength_field").hide();
         $(".walk_field").show();
-        $("#id_summary-group").val(24);
     } else if (val == 1){
         $(".strength_field").hide();
         $(".walk_field").hide();
