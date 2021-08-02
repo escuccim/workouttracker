@@ -426,8 +426,10 @@ class WorkoutSummary(models.Model):
             start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).date()
         if end_date is None:
             end_date = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
-
         end_date = (end_date + datetime.timedelta(days=1))
+
+        # get the number of days to be displayed
+        n_days = (end_date - start_date).days
 
         workouts = WorkoutSummary.objects.filter(user=user).filter(start__gte=start_date).filter(start__lte=end_date).order_by("-start")
 

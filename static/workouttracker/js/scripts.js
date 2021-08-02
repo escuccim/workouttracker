@@ -1638,7 +1638,7 @@ function weight_history(data){
             if(data.bodyfats[i] != null){
                 html += '<td>' + data.bodyfats[i] + ' %</td>';
             } else {
-                html += '<td></td>';
+                html += '<td></td>';piu
             }
 
             html += '<td><a class="edit_weight" data-date="' + data.dates[i] + '" data-weight="' + data.weights[i] + '" data-bodyfat="' + data.bodyfats[i] + '" data-val="' + data.ids[i] + '"><i class="fas fa-edit"></i></a></td>';
