@@ -25,7 +25,7 @@ class MuscleGroupAdmin(admin.ModelAdmin):
     form = MuscleGroupForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'color', 'area', 'parent')
+            'fields': ('name', 'color', 'area', 'parent', 'display_in_list', 'type')
             }),
         )
     inlines = [GroupHierarchyInline, GroupExerciseInline]

@@ -274,7 +274,6 @@ $(document).on("change", "#id_summary-type", function(e){
     } else if (val == 5){
         $(".strength_field").hide();
         $(".walk_field").show();
-        $("#id_summary-group").val(24);
     } else if (val == 1){
         $(".strength_field").hide();
         $(".walk_field").hide();
@@ -1638,7 +1637,7 @@ function weight_history(data){
             if(data.bodyfats[i] != null){
                 html += '<td>' + data.bodyfats[i] + ' %</td>';
             } else {
-                html += '<td></td>';
+                html += '<td></td>';piu
             }
 
             html += '<td><a class="edit_weight" data-date="' + data.dates[i] + '" data-weight="' + data.weights[i] + '" data-bodyfat="' + data.bodyfats[i] + '" data-val="' + data.ids[i] + '"><i class="fas fa-edit"></i></a></td>';
